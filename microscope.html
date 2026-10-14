@@ -8,7 +8,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&family=Press+Start+2P&display=swap">
 <style>
 /* Science is Khool "Arcade Punch" — teal scoreboard, sticker-outlined cards, brand colours. Light only, by brand choice. */
 :root {
@@ -189,6 +189,68 @@ label.f input, label.f select { border: 2px solid var(--line); border-radius: 10
 .idq .row .btn { flex: 1; }
 .pill.timer { font-variant-numeric: tabular-nums; background: var(--yellow); }
 
+/* top bar + footer (as in the other Science is Khool games) */
+body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; }
+.wrap { flex: 1; width: 100%; }
+.topbar { display: flex; align-items: center; gap: 10px; padding-block: 10px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 2px solid #E4E8E9; background: #fff; }
+.topbar .brand { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; text-decoration: none; color: var(--ink); }
+.topbar .brand img { width: 38px; height: 38px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--yellow); object-fit: cover; flex: none; }
+.topbar .brand b { font-weight: 800; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.topbar .brand small { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; line-height: 1.2; }
+footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 14px 16px 20px; }
+footer a { color: var(--teal-ink); font-weight: 700; }
+
+/* start screen */
+.start2 { display: grid; gap: 22px; grid-template-columns: 1fr; align-items: start; padding-block: 8px 20px; }
+@media (min-width: 820px) { .start2 { grid-template-columns: 1.05fr 1fr; gap: 28px; } }
+.start2:not([hidden]) { display: grid; }
+.pcard { background: #fff; border: 3px solid var(--ink); border-radius: 22px; box-shadow: 6px 6px 0 var(--ink); min-width: 0; }
+.hero2 { background: var(--teal); color: #fff; padding: 22px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+.pill2 { align-self: flex-start; font-size: .7rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; border: 2px solid var(--ink); border-radius: 99px; padding: 2px 10px; background: #fff; color: var(--ink); }
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.hero2 h1 { margin: 6px 0 0; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.05; font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
+.hero2 h1 em { font-style: normal; background: var(--yellow); color: var(--ink); border: 3px solid var(--ink); border-radius: 14px; padding: 0 10px; display: inline-block; transform: rotate(-2deg); }
+.hero-scope { width: 104px; flex: none; margin: -14px 0 -18px; transform: rotate(5deg); pointer-events: none; }
+.hero-scope svg { width: 100%; height: auto; display: block; filter: drop-shadow(3px 3px 0 rgba(0,0,0,.18)); }
+@media (max-width: 480px) { .hero-scope { width: 78px; } }
+.hero2 > p { margin: 0; max-width: 42ch; font-weight: 600; }
+.demo2 { background: #fff; color: var(--ink); border: 3px solid var(--ink); border-radius: 16px; padding: 12px 14px; display: grid; gap: 6px; }
+.demo2 small { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--teal-ink); }
+.howlist { margin: 0; padding: 0; list-style: none; counter-reset: h; display: grid; gap: 6px; }
+.howlist li { counter-increment: h; display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; font-weight: 600; }
+.howlist li::before { content: counter(h); flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--yellow); border: 2px solid var(--ink); display: grid; place-items: center; font-size: .78rem; font-weight: 800; }
+.modes2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mode2 { padding: 12px; border: 3px solid var(--ink); border-radius: 16px; background: #FEF8D9; color: var(--ink); }
+.mode2 b { display: block; font-weight: 800; }
+.mode2.dark { background: #0D0B1A; color: #fff; }
+.mode2.dark b { font-family: "Press Start 2P", ui-monospace, monospace; font-size: .72rem; color: var(--yellow); line-height: 1.6; }
+.mode2 span { font-size: .85rem; display: block; line-height: 1.4; margin-top: 4px; }
+.form2 { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.form2 h2 { margin: 0; font-size: 1.25rem; font-weight: 800; }
+.form2 .fields { grid-template-columns: 1fr 1fr; }
+.form2 .fields .f-name { grid-column: 1 / -1; }
+.form2 label.f { font-size: .9rem; }
+.form2 label.f input, .form2 label.f select { font-size: 16px; padding: 12px; border: 2.5px solid var(--ink); border-radius: 12px; }
+.form2 label.f input:focus, .form2 label.f select:focus { outline: 3px solid var(--yellow); outline-offset: 1px; }
+.form2 .err { margin: -6px 0 0; font-size: .9rem; min-height: 0; }
+.form2 .err:empty { display: none; }
+.sbtn.arcade:disabled { opacity: .55; }
+.grp2 { display: grid; gap: 6px; }
+.grp2 > span { font-weight: 700; font-size: .9rem; }
+.go2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sbtn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 3px solid var(--ink); border-radius: 16px; padding: 12px 14px; font-weight: 800; font-size: 1.05rem; text-transform: uppercase; letter-spacing: .03em;
+  background: var(--orange); color: var(--ink); box-shadow: 0 5px 0 var(--ink); cursor: pointer; transition: transform .08s, box-shadow .08s; touch-action: manipulation; }
+.sbtn small { font-size: .74rem; font-weight: 700; text-transform: none; letter-spacing: 0; opacity: .85; }
+.sbtn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+.sbtn:disabled { opacity: .5; cursor: not-allowed; }
+.sbtn.tealb { background: var(--teal); color: #fff; }
+.sbtn.arcade { background: #0D0B1A; color: var(--yellow); font-family: "Press Start 2P", ui-monospace, monospace; font-size: .74rem; line-height: 1.6; text-transform: none; }
+.sbtn.arcade small { font-family: var(--font); color: #fff; font-size: .74rem; }
+.lock { margin: 0; }
+.best2 { display: flex; justify-content: space-between; gap: 10px; font-size: .9rem; color: var(--muted); font-weight: 700; }
+.best2 b { color: var(--ink); text-align: right; }
+@media (max-width: 420px) { .modes2, .go2 { grid-template-columns: 1fr; } }
+
 /* sound toggles + confetti */
 .icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 2.5px solid var(--line); background: #fff; color: var(--ink); display: grid; place-items: center; box-shadow: 0 3px 0 var(--line); padding: 0; flex: none; cursor: pointer; }
 .icon-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
@@ -210,35 +272,59 @@ canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-
 <body>
 <audio id="music" loop preload="none"></audio>
 <canvas id="confetti" hidden></canvas>
+<header class="topbar">
+  <a class="brand" href="https://scienceiskhool.github.io/scienceiskhool/" target="_blank" rel="noopener">
+    <img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/head.png" alt="" onerror="this.style.visibility='hidden'">
+    <span><b>Microscope Lab</b><small>Science is Khool · Cells</small></span>
+  </a>
+    <button class="icon-btn" id="btnMusic" type="button" aria-label="Music on" title="Music (challenge mode)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
+    <button class="icon-btn" id="btnSound" type="button" aria-label="Sound effects on" title="Sound effects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
+</header>
 <div class="wrap">
 
   <!-- ============ START ============ -->
-  <section id="scrStart">
-    <div class="hero">
-      <div class="badge"><img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/mascot.png" alt="" onerror="this.replaceWith(document.createTextNode('🔬'))"></div>
-      <div><h1>Microscope Lab</h1><p>Use a light microscope to look at real cells, then draw and label what you see.</p></div>
-    </div>
-    <div class="card start">
-      <div class="fields">
-        <label class="f f-name">Name<input id="pName" type="text" autocomplete="name" maxlength="60" placeholder="Your full name"></label>
-        <label class="f">Class<select id="pClass"><option value="">Choose…</option></select></label>
-        <label class="f">Register no.<input id="pReg" type="number" min="1" max="50" inputmode="numeric" placeholder="e.g. 12"></label>
+  <section id="scrStart" class="start2">
+    <div class="pcard hero2">
+      <span class="pill2">G1 Science · Cells &nbsp;|&nbsp; G2/G3 Science · Model of Cells</span>
+      <div class="title-row">
+        <h1>Microscope <em>Lab</em></h1>
+        <div class="hero-scope" id="heroScope" aria-hidden="true"></div>
       </div>
-      <p class="err" id="pErr"></p>
-      <div class="badges" id="badges"></div>
-      <div>
-        <h2 style="font-size:1.15rem;margin-bottom:10px">Which course are you in?</h2>
-        <div class="choices">
-          <button class="chip" data-course="g1"><span class="k">G1 Science · Chapter 9</span><span class="t">Cells</span><span class="d">Animal cell (cheek cells): cell membrane, cytoplasm, nucleus</span></button>
-          <button class="chip" data-course="g23"><span class="k">G2 / G3 Science · Chapter 6</span><span class="t">Model of Cells</span><span class="d">Animal and plant cells: cheek cells, onion epidermis, pondweed leaf</span></button>
+      <p>Your microscope is waiting. Learn its parts, bring cells into focus, then name what you see. Earn your Pre-Lab badge to collect a microscope in the lab.</p>
+      <div class="demo2">
+        <small>What you'll do</small>
+        <ol class="howlist">
+          <li><span><b>Find the parts</b> of the light microscope</span></li>
+          <li><span><b>Focus step by step</b>: light, slide, coarse knob, fine knob, 4× → 40×</span></li>
+          <li><span><b>Label the cell</b>: type the names. Spelling counts!</span></li>
+        </ol>
+      </div>
+      <div class="modes2">
+        <div class="mode2"><b>Pre-Lab</b><span>Every slide for your course. Finish to earn your badge.</span></div>
+        <div class="mode2 dark"><b>CHALLENGE</b><span>5 mystery slides against the clock. Unlocks with your badge.</span></div>
+      </div>
+    </div>
+
+    <div class="pcard form2">
+      <h2>Ready, scientist?</h2>
+      <div class="fields">
+        <label class="f f-name">Name<input id="pName" type="text" autocomplete="name" maxlength="60"></label>
+        <label class="f">Class<select id="pClass"><option value="">Choose…</option></select></label>
+        <label class="f">Register no.<input id="pReg" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2"></label>
+      </div>
+      <p class="err" id="pErr" role="alert"></p>
+      <div class="grp2"><span>Start the Pre-Lab</span>
+        <div class="go2">
+          <button class="sbtn" type="button" data-course="g1">G1 Science ▶<small>Animal cell</small></button>
+          <button class="sbtn tealb" type="button" data-course="g23">G2/G3 Science ▶<small>Animal &amp; plant cells</small></button>
         </div>
       </div>
-      <p class="howto"><b>How it works:</b> ① find the parts of the microscope → ② set up and focus the microscope step by step → ③ label the cell you see. Finish every slide to earn your <b>Pre-Lab badge</b> — show it to your teacher to collect your microscope.</p>
-      <div class="chal" id="chalBox">
-        <h3>🏁 Challenge mode</h3>
-        <p class="howto">5 mystery slides, against the clock. Get each one sharp and well lit at 40× as fast as you can. G2/G3 also decide: animal cell or plant cell?</p>
-        <div class="row" id="chalBtns"></div>
+      <div class="grp2"><span>Challenge mode</span>
+        <div class="go2" id="chalBtns"></div>
+        <p class="lock" id="chalLock">🔒 Earn your Pre-Lab badge to unlock.</p>
       </div>
+      <div class="badges" id="badges"></div>
+      <div class="best2"><span>Your best on this device</span><b id="txtBest">–</b></div>
     </div>
   </section>
 
@@ -248,8 +334,6 @@ canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-
     <span class="pill" id="sbCourse">G1</span>
     <span class="pill timer" id="sbTimer" hidden>⏱ 0:00</span>
     <span class="pill" id="sbMist">⚠ 0</span>
-    <button class="icon-btn" id="btnMusic" type="button" aria-label="Music on" title="Music (challenge mode)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
-    <button class="icon-btn" id="btnSound" type="button" aria-label="Sound effects on" title="Sound effects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
     <button class="btn ghost" id="btnHome">Menu</button>
   </div>
 
@@ -286,7 +370,6 @@ canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-
         <div class="coach"><img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/mascot.png" alt="" onerror="this.style.visibility='hidden'"><div class="bubble" id="labCoach"></div></div>
         <div class="fov" id="fov"><canvas id="fovCanvas"></canvas><div class="vig"></div><div class="msg" id="fovMsg"></div></div>
         <div class="readout"><span class="pill">Eyepiece 10×</span><span class="pill" id="roObj">Objective 4×</span><span class="pill total" id="roTot">Total 40×</span></div>
-        <p class="credit" id="labCredit"></p>
         <div class="controls">
           <div class="ctl"><span class="lab">Light source</span><div class="row"><button class="btn off" id="cLight">💡 Off</button></div></div>
           <div class="ctl"><span class="lab">Slide</span><div class="row"><button class="btn" id="cSlide">Place slide</button></div></div>
@@ -310,7 +393,6 @@ canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-
         <h3>What you saw at 400×</h3>
         <div class="fov"><canvas id="snapCanvas"></canvas><div class="vig"></div></div>
         <p class="spec-note" id="snapNote"></p>
-        <p class="credit" id="snapCredit"></p>
       </div>
       <div class="card diag-card">
         <div class="coach"><img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/mascot.png" alt="" onerror="this.style.visibility='hidden'"><div class="bubble" id="lblCoach">Type the name of each numbered part. Spelling counts!</div></div>
@@ -333,6 +415,7 @@ canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-
     </div>
   </section>
 </div>
+<footer>Made for <a href="https://www.instagram.com/scienceiskhool/" target="_blank" rel="noopener">@scienceiskhool</a></footer>
 
 <script>
 (function () {
@@ -371,12 +454,10 @@ var FN = {
   }
 };
 
-/* Photos: tried in order. Put your own copies in an img/ folder next to this file to avoid relying on Wikimedia. */
+/* Slides: each specimen is drawn by drawnSpecimen() below. */
 var SPECIMENS = {
   cheek: {
     title: "Human cheek cells", kind: "Animal cell", stain: "stained with methylene blue",
-    photos: ["img/cheek.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Human_Cheek_Cells_(Methylene_Blue_Stain).jpg?width=1200"],
-    page: "https://commons.wikimedia.org/wiki/File:Human_Cheek_Cells_(Methylene_Blue_Stain).jpg",
     note: "Cheek cells are flat with an irregular shape. The methylene blue stains the nucleus dark blue. There is no cell wall, so the cells have no fixed shape.",
     labels: { g1: ["cell membrane", "cytoplasm", "nucleus"], g23: ["cell membrane", "cytoplasm", "nucleus"] },
     distractors: { g1: [], g23: ["cell wall", "chloroplast"] },
@@ -384,8 +465,6 @@ var SPECIMENS = {
   },
   onion: {
     title: "Onion epidermis", kind: "Plant cell", stain: "stained with iodine solution",
-    photos: ["img/onion.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Iodine_stained_onion_cells.jpg?width=1200"],
-    page: "https://commons.wikimedia.org/wiki/File:Iodine_stained_onion_cells.jpg",
     note: "Onion cells are regular and brick-shaped because of the cell wall. Iodine makes the nucleus stand out. Look for the large vacuole filling most of each cell.",
     labels: { g23: ["cell wall", "cell membrane", "cytoplasm", "nucleus", "vacuole"] },
     distractors: { g23: ["chloroplast"] },
@@ -393,8 +472,6 @@ var SPECIMENS = {
   },
   elodea: {
     title: "Pondweed (Elodea) leaf", kind: "Plant cell", stain: "unstained",
-    photos: ["img/elodea.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Turgid_Elodea_Cells_under_400X_Magnification.jpg?width=1200"],
-    page: "https://commons.wikimedia.org/wiki/File:Turgid_Elodea_Cells_under_400X_Magnification.jpg",
     note: "No stain needed — the green chloroplasts show up on their own. They sit in the thin layer of cytoplasm around the large central vacuole.",
     labels: { g23: ["cell wall", "cell membrane", "cytoplasm", "chloroplast", "vacuole", "nucleus"] },
     distractors: { g23: [] },
@@ -403,13 +480,10 @@ var SPECIMENS = {
 };
 SPECIMENS.blood = {
   title: "Human blood smear", kind: "Animal cell", stain: "stained",
-  photos: ["img/blood.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Normal_Adult_Blood_Smear.JPG?width=1200"],
-  page: "https://commons.wikimedia.org/wiki/File:Normal_Adult_Blood_Smear.JPG",
   reveal: "Human blood: lots of red blood cells (no nucleus, biconcave discs) and a few white blood cells with a large stained nucleus. No cell walls."
 };
 SPECIMENS.root = {
   title: "Root hair cells", kind: "Plant cell", stain: "stained",
-  photos: ["img/root.jpg"], page: "",
   reveal: "Root hair cells: each has a long root hair that increases surface area to absorb water and mineral salts. Cell walls, but no chloroplasts — roots grow in the dark."
 };
 SPECIMENS.cheek.reveal = "Human cheek cells: irregular shape, no cell wall, stained nucleus.";
@@ -588,14 +662,22 @@ function renderStart() {
     if (rec) { any = true; html += badgeHTML(c, rec, p, st.best && st.best[id + "|" + c]); }
   });
   $("badges").innerHTML = html;
-  var btns = "";
+  var btns = "", bests = [];
   ["g1", "g23"].forEach(function (c) {
     var has = valid && st.badges && st.badges[id + "|" + c];
-    btns += '<button class="btn ' + (has ? "orange" : "ghost") + '" data-chal="' + c + '"' + (has ? "" : " disabled") + ">" + (has ? "" : "🔒 ") + COURSE_NAME[c] + " challenge</button>";
+    btns += '<button class="sbtn arcade" type="button" data-chal="' + c + '"' + (has ? "" : " disabled") + ">" + (has ? "" : "🔒 ") + (c === "g1" ? "G1" : "G2/G3") + "<small>" + (has ? "Unlocked" : "Locked") + "</small></button>";
+    var bb = valid && st.best && st.best[id + "|" + c];
+    if (bb) bests.push((c === "g1" ? "G1 " : "G2/G3 ") + bb.score);
   });
-  $("chalBtns").innerHTML = btns + (any ? "" : '<p class="lock">Locked — earn your Pre-Lab badge first.</p>');
+  $("chalBtns").innerHTML = btns;
+  $("chalLock").hidden = any;
+  $("txtBest").textContent = bests.length ? "Challenge " + bests.join(" · ") : "–";
   $("chalBtns").querySelectorAll("[data-chal]").forEach(function (b) { b.addEventListener("click", function () { startChallenge(b.getAttribute("data-chal")); }); });
 }
+$("heroScope").innerHTML = scopeSVG("hero");
+$("objGhero").innerHTML = objectivesSVG(40);
+$("slidehero").setAttribute("opacity", "1");
+$("glowChero").setAttribute("opacity", "0.9"); $("bulbhero").setAttribute("fill", "#FCE883");
 (function initProfile() {
   var st = loadStore();
   if (st.profile) { $("pName").value = st.profile.name || ""; $("pClass").value = st.profile.cls || ""; $("pReg").value = st.profile.reg || ""; }
@@ -780,16 +862,9 @@ $("btnReParts").addEventListener("click", startParts);
 var TEX = {};   // key -> { src: canvas|img, w, h, photo: bool, pattern: {ctxId: CanvasPattern}, mirror: canvas }
 
 function loadTexture(key, cb) {
-  if (TEX[key]) return cb(TEX[key]);
-  var list = SPECIMENS[key].photos.slice();
-  (function next() {
-    if (!list.length) { TEX[key] = makeTex(drawnSpecimen(key), false); if (key === "root") TEX[key].startX = 0.38; return cb(TEX[key]); }
-    var url = list.shift(), img = new Image(), done = false;
-    var timer = setTimeout(function () { if (!done) { done = true; next(); } }, 8000);
-    img.onload = function () { if (done) return; done = true; clearTimeout(timer); TEX[key] = makeTex(img, true, url); cb(TEX[key]); };
-    img.onerror = function () { if (done) return; done = true; clearTimeout(timer); next(); };
-    img.src = url;
-  })();
+  // Every slide uses the built-in drawing of that specimen.
+  if (!TEX[key]) { TEX[key] = makeTex(drawnSpecimen(key)); if (key === "root") TEX[key].startX = 0.38; }
+  cb(TEX[key]);
 }
 function makeTex(src, photo, url) {
   var w = src.naturalWidth || src.width, h = src.naturalHeight || src.height;
@@ -966,7 +1041,6 @@ function startLab(key) {
   bindScope();
   var ch = G.mode === "challenge";
   $("specNote").innerHTML = ch ? "<b>Mystery slide " + (CH.idx + 1) + " of " + CH.order.length + ".</b> Get a sharp, well-lit image at 40×." : "<b>Slide:</b> " + esc(sp.title) + ", " + esc(sp.stain) + ".";
-  $("labCredit").textContent = "";
   $("steps").hidden = ch; $("idq").hidden = true; $("btnChNext").hidden = true; $("btnObserve").hidden = false;
   $("btnObserve").textContent = ch ? (G.course === "g1" ? "Lock it in ▸" : "Identify this cell ▸") : "Draw & label this cell ▸";
   if (ch) { M.fshift = Math.round((Math.random() * 14 - 5) * 10) / 10; M.ashift = Math.round(Math.random() * 20 - 10); CH.slideStart = Date.now(); CH.answered = false; }
@@ -974,7 +1048,6 @@ function startLab(key) {
   show("scrLab");
   loadTexture(key, function (t) {
     labTex = t;
-    if (G.mode !== "challenge") $("labCredit").innerHTML = t.photo ? 'Photo: <a href="' + sp.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>' : "Drawn view (photo could not load)";
     refresh();
   });
   refresh();
@@ -1303,7 +1376,6 @@ function startLabel() {
   updateSB("Step 4 · Label the cell");
   show("scrLabel");
   $("snapNote").textContent = sp.note;
-  $("snapCredit").innerHTML = labTex && labTex.photo ? 'Photo: <a href="' + sp.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>' : "Drawn view";
   requestAnimationFrame(function () { renderField($("snapCanvas"), M, labTex); });
   // diagram with numbered markers
   var svg = $("diag");
@@ -1479,7 +1551,6 @@ function revealSlide(right) {
   var lead = right === null ? "Locked in! " : right ? "✓ Correct — " + sp.kind.toLowerCase() + ". " : "✗ Not quite — it's " + (sp.kind === "Animal cell" ? "an " : "a ") + sp.kind.toLowerCase() + ". ";
   coach($("labCoach"), lead + sp.reveal, right === false ? "warn" : "good");
   $("specNote").innerHTML = "<b>Slide " + (CH.idx + 1) + ":</b> " + esc(sp.title) + ".";
-  if (labTex && labTex.photo && sp.page) $("labCredit").innerHTML = 'Photo: <a href="' + sp.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>';
   $("btnChNext").hidden = false;
   $("btnChNext").textContent = CH.idx + 1 < CH.order.length ? "Next slide ▸" : "See my score ▸";
 }
