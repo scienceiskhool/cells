@@ -1,0 +1,1523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Microscope Lab</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap">
+<style>
+/* Science is Khool "Arcade Punch" — teal scoreboard, sticker-outlined cards, brand colours. Light only, by brand choice. */
+:root {
+  --orange: #FF8243; --pink: #FFC0CB; --yellow: #FCE883; --teal: #069494; --teal-ink: #057A7A;
+  --ink: #1d2626; --muted: #5a6b6b; --line: #1d2626; --paper: #ffffff; --wash: #f3fbfa;
+  --good: #1f9d55; --goodbg: #d9f5e4; --bad: #d64545; --badbg: #ffe1e1;
+  --font: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; background: var(--paper); color: var(--ink); }
+body { font-family: var(--font); font-size: 16px; line-height: 1.45; -webkit-tap-highlight-color: transparent; }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 16px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.15; }
+button, input { font: inherit; }
+.btn { border: 2.5px solid var(--line); border-radius: 12px; padding: 10px 18px; font-weight: 800; background: var(--yellow); color: var(--ink);
+  box-shadow: 0 4px 0 var(--line); cursor: pointer; transition: transform .08s, box-shadow .08s; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.btn:focus-visible, .chip:focus-visible, input:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+.btn.teal { background: var(--teal); color: #fff; }
+.btn.orange { background: var(--orange); }
+.btn.pink { background: var(--pink); }
+.btn.ghost { background: var(--paper); }
+.btn.sm { padding: 7px 12px; font-size: .92rem; border-radius: 10px; }
+.btn:disabled { opacity: .5; cursor: default; transform: none; box-shadow: 0 4px 0 var(--line); }
+.card { border: 2.5px solid var(--line); border-radius: 18px; background: var(--paper); box-shadow: 0 6px 0 var(--line); }
+
+/* scoreboard */
+.score { background: var(--teal); color: #fff; border: 2.5px solid var(--line); border-radius: 16px; box-shadow: 0 5px 0 var(--line);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 16px; margin-bottom: 16px; }
+.score h2 { font-size: 1.1rem; font-weight: 800; flex: 1 1 200px; min-width: 0; }
+.pill { background: #fff; color: var(--ink); border: 2px solid var(--line); border-radius: 99px; padding: 2px 12px; font-weight: 800; font-size: .85rem; white-space: nowrap; }
+.score .btn { padding: 5px 12px; font-size: .85rem; box-shadow: 0 3px 0 var(--line); }
+
+/* start */
+.hero { display: flex; gap: 14px; align-items: center; margin: 8px 0 18px; }
+.badge { width: 62px; height: 62px; border-radius: 16px; border: 2.5px solid var(--line); background: var(--yellow); display: grid; place-items: center; box-shadow: 0 4px 0 var(--line); flex: none; overflow: hidden; }
+.badge img { width: 100%; height: 100%; object-fit: cover; }
+.hero h1 { font-size: clamp(1.6rem, 5vw, 2.3rem); font-weight: 800; }
+.hero p { margin: 4px 0 0; color: var(--muted); font-weight: 600; }
+.start { padding: 20px; display: grid; gap: 16px; max-width: 760px; }
+.choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.chip { text-align: left; border: 2.5px solid var(--line); border-radius: 14px; padding: 14px 16px; background: var(--paper); cursor: pointer; display: grid; gap: 4px;
+  box-shadow: 0 4px 0 var(--line); color: var(--ink); touch-action: manipulation; }
+.chip:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); }
+.chip .k { font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--teal-ink); }
+.chip .t { font-weight: 800; font-size: 1.1rem; line-height: 1.25; }
+.chip .d { font-size: .9rem; color: var(--muted); }
+.chip.done { background: var(--goodbg); }
+.chip.done .k::after { content: " ✓ done"; color: var(--good); }
+.howto { margin: 0; color: var(--muted); font-size: .95rem; }
+
+/* coach */
+.coach { display: flex; gap: 10px; align-items: flex-start; }
+.coach img { width: 46px; height: 46px; border-radius: 50%; border: 2.5px solid var(--line); background: var(--yellow); object-fit: cover; flex: none; }
+.coach .bubble { position: relative; flex: 1; background: var(--wash); border: 2.5px solid var(--line); border-radius: 14px; padding: 9px 13px; font-weight: 600; min-height: 46px; }
+.coach .bubble.warn { background: var(--orange); animation: shake .35s; }
+.coach .bubble.good { background: var(--goodbg); }
+@keyframes shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-6px) } 75% { transform: translateX(6px) } }
+@media (prefers-reduced-motion: reduce) { .coach .bubble.warn { animation: none; } }
+
+/* microscope svg */
+.scope-svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
+.scope-svg .part { cursor: pointer; }
+.scope-svg .hl { stroke: var(--orange) !important; stroke-width: 5 !important; }
+.scope-svg .flash-good { animation: fg .9s; }
+.scope-svg .flash-bad { animation: fb .7s; }
+@keyframes fg { 0%,100% { filter: none } 30% { filter: drop-shadow(0 0 6px #1f9d55) drop-shadow(0 0 2px #1f9d55) } }
+@keyframes fb { 0%,100% { filter: none } 30% { filter: drop-shadow(0 0 6px #d64545) drop-shadow(0 0 2px #d64545) } }
+.scope-svg text { font-family: var(--font); pointer-events: none; }
+
+/* identify parts */
+.id-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 760px) { .id-grid { grid-template-columns: 1fr; } }
+.id-scope { padding: 10px; max-width: 460px; justify-self: center; width: 100%; }
+.id-panel { padding: 16px; display: grid; gap: 14px; }
+.prompt { font-size: 1.25rem; font-weight: 800; }
+.prompt b { background: var(--yellow); border: 2px solid var(--line); border-radius: 10px; padding: 0 8px; white-space: nowrap; }
+.bar { height: 14px; border: 2px solid var(--line); border-radius: 99px; overflow: hidden; background: var(--wash); }
+.bar i { display: block; height: 100%; background: var(--orange); width: 0; transition: width .3s; }
+.fn { border: 2px dashed var(--line); border-radius: 12px; padding: 10px 12px; background: var(--yellow); }
+.fn h3 { font-size: 1rem; margin-bottom: 2px; }
+.fn p { margin: 0; }
+.found { display: flex; flex-wrap: wrap; gap: 6px; }
+.found span { font-size: .8rem; font-weight: 700; border: 2px solid var(--line); border-radius: 99px; padding: 1px 9px; background: var(--goodbg); }
+.found span.miss { background: var(--badbg); }
+
+/* lab */
+.lab-grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
+@media (max-width: 860px) { .lab-grid { grid-template-columns: 1fr; } .lab-grid .scope-card { order: 2; } }
+.scope-card { padding: 10px; }
+.view-card { padding: 14px; display: grid; gap: 12px; }
+.fov { position: relative; width: min(100%, 420px); aspect-ratio: 1; margin: 0 auto; border-radius: 50%; background: #000; border: 3px solid var(--line); box-shadow: 0 6px 0 var(--line); overflow: hidden; touch-action: none; cursor: grab; }
+.fov.dragging { cursor: grabbing; }
+.fov canvas { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; }
+.fov .vig { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, transparent 60%, rgba(0,0,0,.35) 82%, rgba(0,0,0,.85) 100%); }
+.fov .msg { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: #fff; font-weight: 700; padding: 22%; pointer-events: none; font-size: .95rem; }
+.readout { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; font-weight: 700; font-size: .92rem; }
+.readout .pill { background: var(--wash); }
+.readout .pill.total { background: var(--yellow); }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.ctl { border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; display: grid; gap: 6px; background: var(--paper); }
+.ctl .lab { font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal-ink); }
+.ctl .row { display: flex; gap: 6px; flex-wrap: wrap; }
+.ctl .row .btn { flex: 1; padding: 7px 6px; font-size: .9rem; box-shadow: 0 3px 0 var(--line); border-radius: 10px; }
+.seg .btn[aria-pressed="true"] { background: var(--teal); color: #fff; }
+.btn.on { background: var(--yellow); }
+.btn.off { background: #e9eeee; }
+.dial { width: 104px; height: 104px; margin: 2px auto 0; touch-action: none; cursor: grab; border-radius: 50%; user-select: none; -webkit-user-select: none; }
+.dial.turning { cursor: grabbing; }
+.dial svg { width: 100%; height: 100%; display: block; }
+.dial-hint { font-size: .75rem; color: var(--muted); font-weight: 700; text-align: center; }
+input[type=range] { width: 100%; accent-color: var(--teal); height: 28px; }
+.range-ends { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); font-weight: 700; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; counter-reset: s; }
+.steps li { counter-increment: s; display: flex; gap: 8px; align-items: flex-start; font-size: .92rem; padding: 4px 6px; border-radius: 8px; color: var(--muted); }
+.steps li::before { content: counter(s); flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: .75rem; font-weight: 800; background: #fff; color: var(--ink); }
+.steps li.cur { background: var(--yellow); color: var(--ink); font-weight: 700; }
+.steps li.ok { color: var(--ink); }
+.steps li.ok::before { content: "✓"; background: var(--good); color: #fff; }
+.spec-note { font-size: .9rem; color: var(--muted); margin: 0; }
+.credit { font-size: .75rem; color: var(--muted); margin: 0; text-align: center; }
+.credit a { color: var(--teal-ink); }
+
+/* label */
+.label-grid { display: grid; grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr); gap: 18px; align-items: start; }
+@media (max-width: 860px) { .label-grid { grid-template-columns: 1fr; } }
+.photo-card { padding: 14px; display: grid; gap: 10px; }
+.photo-card .fov { width: min(100%, 300px); cursor: default; }
+.diag-card { padding: 14px; display: grid; gap: 12px; }
+.diag { width: 100%; max-width: 480px; margin: 0 auto; height: auto; display: block; user-select: none; -webkit-user-select: none; }
+.diag text { font-family: var(--font); }
+.diag .box { cursor: pointer; }
+.bank { display: flex; flex-wrap: wrap; gap: 8px; min-height: 46px; }
+.word { border: 2.5px solid var(--line); border-radius: 99px; padding: 6px 14px; background: var(--pink); font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 var(--line); touch-action: manipulation; }
+.slots { display: grid; gap: 8px; }
+.slot { display: flex; align-items: center; gap: 10px; border: 2.5px solid var(--line); border-radius: 12px; padding: 6px 10px; background: #fff; }
+.slot .n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: .85rem; font-weight: 800; }
+.slot input { flex: 1; min-width: 0; border: 2px solid var(--line); border-radius: 9px; padding: 8px 10px; font-weight: 700; font-size: 1rem; background: #fff; color: var(--ink); }
+.slot input:focus { outline: 3px solid var(--orange); outline-offset: 1px; }
+.slot input[readonly] { background: transparent; border-color: transparent; }
+.slot .fb { flex: 0 1 auto; min-width: 0; font-size: .82rem; font-weight: 800; max-width: 40%; text-align: right; }
+.slot .fb:empty { display: none; }
+@media (max-width: 480px) { .slot { flex-wrap: wrap; } .slot input { flex-basis: calc(100% - 40px); } .slot .fb { max-width: none; flex-basis: 100%; text-align: left; padding-left: 38px; } }
+.slot.ok { background: var(--goodbg); } .slot.ok .n { background: var(--good); } .slot.ok .fb { color: var(--good); }
+.slot.spell { background: #ffe8da; } .slot.spell .n { background: var(--orange); } .slot.spell .fb { color: #b44a12; }
+.slot.wrong { background: var(--badbg); } .slot.wrong .n { background: var(--bad); } .slot.wrong .fb { color: var(--bad); }
+.slot.shown { background: #eef1f1; } .slot.shown .n { background: var(--muted); } .slot.shown .fb { color: var(--muted); }
+.word[aria-pressed="true"] { background: var(--orange); transform: translateY(-2px); box-shadow: 0 5px 0 var(--line); }
+.table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.table th, .table td { border: 2px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+.table th { background: var(--yellow); }
+.table tr.miss td:first-child { background: var(--badbg); }
+
+/* profile + badge */
+.fields { display: grid; grid-template-columns: 2fr 1.2fr .8fr; gap: 12px; }
+@media (max-width: 560px) { .fields { grid-template-columns: 1fr 1fr; } .fields .f-name { grid-column: 1 / -1; } }
+label.f { display: grid; gap: 4px; font-weight: 700; font-size: .85rem; min-width: 0; }
+label.f input, label.f select { border: 2px solid var(--line); border-radius: 10px; padding: 9px 10px; background: #fff; color: var(--ink); width: 100%; min-width: 0; font: inherit; }
+.err { color: var(--bad); font-weight: 700; margin: 0; min-height: 1.3em; }
+.badges { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.badgecard { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border: 2.5px solid var(--line); border-radius: 18px; box-shadow: 0 6px 0 var(--line);
+  background: repeating-linear-gradient(135deg, var(--yellow) 0 14px, #fdf1a8 14px 28px); min-width: 0; }
+.badgecard svg { width: 78px; height: 92px; flex: none; }
+.badgecard .bt { font-weight: 800; font-size: 1.05rem; line-height: 1.2; }
+.badgecard .bs { font-size: .78rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--teal-ink); }
+.badgecard .who { font-weight: 700; margin-top: 4px; overflow-wrap: anywhere; }
+.badgecard .when { font-size: .82rem; color: var(--muted); font-weight: 600; }
+.badgecard .best { font-size: .82rem; font-weight: 800; margin-top: 2px; }
+.chal { display: grid; gap: 10px; border: 2.5px dashed var(--line); border-radius: 16px; padding: 14px; background: var(--wash); }
+.chal h3 { font-size: 1.05rem; }
+.chal .row { display: flex; flex-wrap: wrap; gap: 10px; }
+.lock { color: var(--muted); font-weight: 700; font-size: .92rem; margin: 0; }
+.idq { display: grid; gap: 10px; border: 2.5px solid var(--line); border-radius: 14px; padding: 12px; background: var(--yellow); }
+.idq p { margin: 0; font-weight: 800; }
+.idq .row { display: flex; gap: 10px; flex-wrap: wrap; }
+.idq .row .btn { flex: 1; }
+.pill.timer { font-variant-numeric: tabular-nums; background: var(--yellow); }
+
+/* sound toggles + confetti */
+.icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 2.5px solid var(--line); background: #fff; color: var(--ink); display: grid; place-items: center; box-shadow: 0 3px 0 var(--line); padding: 0; flex: none; cursor: pointer; }
+.icon-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn.off { opacity: .45; }
+.icon-btn.off svg { position: relative; }
+.sound-row { display: flex; gap: 8px; align-items: center; }
+canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+
+/* results */
+.results { padding: 20px; display: grid; gap: 14px; max-width: 720px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.stat { border: 2.5px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--wash); }
+.stat b { display: block; font-size: 1.6rem; line-height: 1.1; }
+.stat span { font-size: .85rem; color: var(--muted); font-weight: 700; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>
+</head>
+<body>
+<audio id="music" loop preload="none"></audio>
+<canvas id="confetti" hidden></canvas>
+<div class="wrap">
+
+  <!-- ============ START ============ -->
+  <section id="scrStart">
+    <div class="hero">
+      <div class="badge"><img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/mascot.png" alt="" onerror="this.replaceWith(document.createTextNode('🔬'))"></div>
+      <div><h1>Microscope Lab</h1><p>Use a light microscope to look at real cells, then draw and label what you see.</p></div>
+    </div>
+    <div class="card start">
+      <div class="fields">
+        <label class="f f-name">Name<input id="pName" type="text" autocomplete="name" maxlength="60" placeholder="Your full name"></label>
+        <label class="f">Class<select id="pClass"><option value="">Choose…</option></select></label>
+        <label class="f">Register no.<input id="pReg" type="number" min="1" max="50" inputmode="numeric" placeholder="e.g. 12"></label>
+      </div>
+      <p class="err" id="pErr"></p>
+      <div class="badges" id="badges"></div>
+      <div>
+        <h2 style="font-size:1.15rem;margin-bottom:10px">Which course are you in?</h2>
+        <div class="choices">
+          <button class="chip" data-course="g1"><span class="k">G1 Science · Chapter 9</span><span class="t">Cells</span><span class="d">Animal cell (cheek cells): cell membrane, cytoplasm, nucleus</span></button>
+          <button class="chip" data-course="g23"><span class="k">G2 / G3 Science · Chapter 6</span><span class="t">Model of Cells</span><span class="d">Animal and plant cells: cheek cells, onion epidermis, pondweed leaf</span></button>
+        </div>
+      </div>
+      <p class="howto"><b>How it works:</b> ① find the parts of the microscope → ② set up and focus the microscope step by step → ③ label the cell you see. Finish every slide to earn your <b>Pre-Lab badge</b> — show it to your teacher to collect your microscope.</p>
+      <div class="chal" id="chalBox">
+        <h3>🏁 Challenge mode</h3>
+        <p class="howto">5 mystery slides, against the clock. Get each one sharp and well lit at 40× as fast as you can. G2/G3 also decide: animal cell or plant cell?</p>
+        <div class="row" id="chalBtns"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCOREBOARD ============ -->
+  <div class="score" id="scoreboard" hidden>
+    <h2 id="sbTitle">Microscope Lab</h2>
+    <span class="pill" id="sbCourse">G1</span>
+    <span class="pill timer" id="sbTimer" hidden>⏱ 0:00</span>
+    <span class="pill" id="sbMist">⚠ 0</span>
+    <button class="icon-btn" id="btnMusic" type="button" aria-label="Music on" title="Music (challenge mode)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
+    <button class="icon-btn" id="btnSound" type="button" aria-label="Sound effects on" title="Sound effects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></button>
+    <button class="btn ghost" id="btnHome">Menu</button>
+  </div>
+
+  <!-- ============ IDENTIFY PARTS ============ -->
+  <section id="scrParts" hidden>
+    <div class="id-grid">
+      <div class="card id-scope" id="idScopeHost"></div>
+      <div class="card id-panel">
+        <div class="coach"><img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/mascot.png" alt="" onerror="this.style.visibility='hidden'"><div class="bubble" id="idCoach">Tap the part of the microscope I name. Get it right first time to score!</div></div>
+        <div class="prompt" id="idPrompt"></div>
+        <div class="bar" aria-hidden="true"><i id="idBar"></i></div>
+        <div class="fn" id="idFn" hidden><h3 id="idFnT"></h3><p id="idFnD"></p></div>
+        <div class="found" id="idFound"></div>
+        <div class="actions"><button class="btn teal" id="idNext" hidden>Use the microscope ▸</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SPECIMEN MENU ============ -->
+  <section id="scrMenu" hidden>
+    <div class="card start">
+      <h2 style="font-size:1.15rem">Choose a slide to observe</h2>
+      <div class="choices" id="menuChoices"></div>
+      <p class="howto" id="menuHow">Each slide: set up the microscope, focus at 40×, then label the cell.</p>
+      <div class="actions"><button class="btn teal" id="btnFinish" hidden>See my results ▸</button><button class="btn ghost" id="btnReParts">Practise microscope parts again</button></div>
+    </div>
+  </section>
+
+  <!-- ============ LAB ============ -->
+  <section id="scrLab" hidden>
+    <div class="lab-grid">
+      <div class="card scope-card" id="labScopeHost"></div>
+      <div class="card view-card">
+        <div class="coach"><img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/mascot.png" alt="" onerror="this.style.visibility='hidden'"><div class="bubble" id="labCoach"></div></div>
+        <div class="fov" id="fov"><canvas id="fovCanvas"></canvas><div class="vig"></div><div class="msg" id="fovMsg"></div></div>
+        <div class="readout"><span class="pill">Eyepiece 10×</span><span class="pill" id="roObj">Objective 4×</span><span class="pill total" id="roTot">Total 40×</span></div>
+        <p class="credit" id="labCredit"></p>
+        <div class="controls">
+          <div class="ctl"><span class="lab">Light source</span><div class="row"><button class="btn off" id="cLight">💡 Off</button></div></div>
+          <div class="ctl"><span class="lab">Slide</span><div class="row"><button class="btn" id="cSlide">Place slide</button></div></div>
+          <div class="ctl seg"><span class="lab" id="noseLab">Revolving nosepiece</span><div class="row"><button class="btn" data-obj="4">4×</button><button class="btn" data-obj="10">10×</button><button class="btn" data-obj="40">40×</button></div></div>
+          <div class="ctl"><span class="lab">Diaphragm</span><input type="range" id="cDia" min="0" max="100" step="1" value="100" aria-label="Diaphragm opening"><div class="range-ends"><span>less light</span><span>more light</span></div></div>
+          <div class="ctl"><span class="lab">Coarse adjustment knob</span><div class="dial" id="dCoarse" tabindex="0" role="slider" aria-label="Coarse adjustment knob: drag left or right, or use the arrow keys"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FF8243" stroke="#1d2626" stroke-width="4"/><g class="rot"><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(0 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(15 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(30 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(45 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(60 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(75 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(90 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(105 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(120 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(135 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(150 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(165 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(180 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(195 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(210 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(225 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(240 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(255 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(270 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(285 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(300 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(315 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(330 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(345 50 50)"/><circle cx="50" cy="26" r="7" fill="#1d2626"/></g><circle cx="50" cy="50" r="10" fill="#fff" stroke="#1d2626" stroke-width="3"/></svg></div><span class="dial-hint">Hold and circle ↻ or ↺</span></div>
+          <div class="ctl"><span class="lab">Fine adjustment knob</span><div class="dial" id="dFine" tabindex="0" role="slider" aria-label="Fine adjustment knob: drag left or right, or use the arrow keys"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="#FCE883" stroke="#1d2626" stroke-width="4"/><g class="rot"><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(0 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(10 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(20 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(30 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(40 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(50 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(60 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(70 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(80 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(90 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(100 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(110 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(120 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(130 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(140 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(150 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(160 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(170 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(180 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(190 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(200 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(210 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(220 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(230 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(240 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(250 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(260 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(270 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(280 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(290 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(300 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(310 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(320 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(330 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(340 50 50)"/><line x1="50" y1="7" x2="50" y2="15" stroke="#1d2626" stroke-width="2.5" transform="rotate(350 50 50)"/><circle cx="50" cy="26" r="7" fill="#1d2626"/></g><circle cx="50" cy="50" r="10" fill="#fff" stroke="#1d2626" stroke-width="3"/></svg></div><span class="dial-hint">Hold and circle ↻ or ↺</span></div>
+        </div>
+        <ol class="steps" id="steps"></ol>
+        <p class="spec-note" id="specNote"></p>
+        <div class="idq" id="idq" hidden><p>Is this an animal cell or a plant cell?</p><div class="row"><button class="btn pink" data-kind="Animal cell">Animal cell</button><button class="btn" data-kind="Plant cell" style="background:#c9ecd2">Plant cell</button></div></div>
+        <div class="actions"><button class="btn teal" id="btnObserve" disabled>Draw &amp; label this cell ▸</button><button class="btn" id="btnChNext" hidden>Next slide ▸</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LABEL ============ -->
+  <section id="scrLabel" hidden>
+    <div class="label-grid">
+      <div class="card photo-card">
+        <h3>What you saw at 400×</h3>
+        <div class="fov"><canvas id="snapCanvas"></canvas><div class="vig"></div></div>
+        <p class="spec-note" id="snapNote"></p>
+        <p class="credit" id="snapCredit"></p>
+      </div>
+      <div class="card diag-card">
+        <div class="coach"><img src="https://scienceiskhool.github.io/scienceiskhool/assets/img/mascot.png" alt="" onerror="this.style.visibility='hidden'"><div class="bubble" id="lblCoach">Type the name of each numbered part. Spelling counts!</div></div>
+        <svg class="diag" id="diag" viewBox="0 0 640 400" role="img" aria-label="Cell diagram to label"></svg>
+        <div class="slots" id="slots"></div>
+        <div class="actions"><button class="btn teal" id="btnCheck" disabled>Check labels</button><button class="btn ghost" id="btnShow" hidden>Show answers</button><button class="btn" id="btnLblNext" hidden>Next ▸</button></div>
+        <div id="fnTable"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="scrResults" hidden>
+    <div class="card results">
+      <h2 id="resTitle">Lab complete! 🎉</h2>
+      <div id="resBadge"></div>
+      <div class="stats" id="stats"></div>
+      <div id="resNote"></div>
+      <div class="actions"><button class="btn orange" id="btnChal">🏁 Try challenge mode</button><button class="btn teal" id="btnAgain">Play again</button><button class="btn ghost" id="btnChange">Back to start</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+"use strict";
+
+/* ------------------------------------------------------------------
+   CONTENT
+------------------------------------------------------------------ */
+var PARTS = [
+  { id: "eyepiece", name: "eyepiece", fn: "The lens you look through. It magnifies the image (usually 10×)." },
+  { id: "objective", name: "objective lenses", fn: "Magnify the specimen. There are usually three: 4×, 10× and 40×." },
+  { id: "nosepiece", name: "revolving nosepiece", fn: "Turn it to change from one objective lens to another." },
+  { id: "stage", name: "stage", fn: "The flat platform where the slide is placed." },
+  { id: "clips", name: "stage clips", fn: "Hold the slide firmly in place on the stage." },
+  { id: "coarse", name: "coarse adjustment knob", fn: "Moves the stage up or down a lot to bring the specimen roughly into focus. Use at low power only." },
+  { id: "fine", name: "fine adjustment knob", fn: "Moves the stage a tiny bit to make the image sharp. The only focus knob to use at high power." },
+  { id: "diaphragm", name: "diaphragm", fn: "Controls how much light passes through the specimen, changing the brightness and contrast." },
+  { id: "light", name: "light source", fn: "Gives out light that passes up through the specimen." },
+  { id: "arm", name: "arm", fn: "Supports the upper parts. Hold the arm with one hand when carrying the microscope." },
+  { id: "base", name: "base", fn: "Supports the whole microscope. Put your other hand under the base when carrying it." }
+];
+
+var FN = {
+  g1: {
+    "cell membrane": "Controls what enters and leaves the cell; flexible, so the cell can change shape",
+    "cytoplasm": "Where most cell activities take place; contains water, digested food and other cell parts",
+    "nucleus": "Controls all activities of the cell; contains genes"
+  },
+  g23: {
+    "cell membrane": "Partially permeable; controls movement of substances in and out",
+    "cytoplasm": "Site of chemical reactions",
+    "nucleus": "Controls all cell activities; contains chromosomes",
+    "vacuole": "Stores food, water and waste (plant cells: one large central vacuole containing cell sap)",
+    "cell wall": "Fully permeable; protects the cell and keeps its shape; made of cellulose",
+    "chloroplast": "Contains chlorophyll to make food by photosynthesis"
+  }
+};
+
+/* Photos: tried in order. Put your own copies in an img/ folder next to this file to avoid relying on Wikimedia. */
+var SPECIMENS = {
+  cheek: {
+    title: "Human cheek cells", kind: "Animal cell", stain: "stained with methylene blue",
+    photos: ["img/cheek.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Human_Cheek_Cells_(Methylene_Blue_Stain).jpg?width=1200"],
+    page: "https://commons.wikimedia.org/wiki/File:Human_Cheek_Cells_(Methylene_Blue_Stain).jpg",
+    note: "Cheek cells are flat with an irregular shape. The methylene blue stains the nucleus dark blue. There is no cell wall, so the cells have no fixed shape.",
+    labels: { g1: ["cell membrane", "cytoplasm", "nucleus"], g23: ["cell membrane", "cytoplasm", "nucleus"] },
+    distractors: { g1: [], g23: ["cell wall", "chloroplast"] },
+    after: { g1: "", g23: "Animal cells have no cell wall and no chloroplasts — that is why “cell wall” and “chloroplast” were not needed." }
+  },
+  onion: {
+    title: "Onion epidermis", kind: "Plant cell", stain: "stained with iodine solution",
+    photos: ["img/onion.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Iodine_stained_onion_cells.jpg?width=1200"],
+    page: "https://commons.wikimedia.org/wiki/File:Iodine_stained_onion_cells.jpg",
+    note: "Onion cells are regular and brick-shaped because of the cell wall. Iodine makes the nucleus stand out. Look for the large vacuole filling most of each cell.",
+    labels: { g23: ["cell wall", "cell membrane", "cytoplasm", "nucleus", "vacuole"] },
+    distractors: { g23: ["chloroplast"] },
+    after: { g23: "No chloroplasts here! The onion bulb grows underground, away from light, so its cells do not photosynthesise." }
+  },
+  elodea: {
+    title: "Pondweed (Elodea) leaf", kind: "Plant cell", stain: "unstained",
+    photos: ["img/elodea.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Turgid_Elodea_Cells_under_400X_Magnification.jpg?width=1200"],
+    page: "https://commons.wikimedia.org/wiki/File:Turgid_Elodea_Cells_under_400X_Magnification.jpg",
+    note: "No stain needed — the green chloroplasts show up on their own. They sit in the thin layer of cytoplasm around the large central vacuole.",
+    labels: { g23: ["cell wall", "cell membrane", "cytoplasm", "chloroplast", "vacuole", "nucleus"] },
+    distractors: { g23: [] },
+    after: { g23: "Leaf cells have chloroplasts to make food by photosynthesis. In real pondweed the nucleus is often hard to see because the chloroplasts crowd around it." }
+  }
+};
+SPECIMENS.blood = {
+  title: "Human blood smear", kind: "Animal cell", stain: "stained",
+  photos: ["img/blood.jpg", "https://commons.wikimedia.org/wiki/Special:FilePath/Normal_Adult_Blood_Smear.JPG?width=1200"],
+  page: "https://commons.wikimedia.org/wiki/File:Normal_Adult_Blood_Smear.JPG",
+  reveal: "Human blood: lots of red blood cells (no nucleus, biconcave discs) and a few white blood cells with a large stained nucleus. No cell walls."
+};
+SPECIMENS.root = {
+  title: "Root hair cells", kind: "Plant cell", stain: "stained",
+  photos: ["img/root.jpg"], page: "",
+  reveal: "Root hair cells: each has a long root hair that increases surface area to absorb water and mineral salts. Cell walls, but no chloroplasts — roots grow in the dark."
+};
+SPECIMENS.cheek.reveal = "Human cheek cells: irregular shape, no cell wall, stained nucleus.";
+SPECIMENS.onion.reveal = "Onion epidermis: regular brick-shaped cells with cell walls and a large vacuole. No chloroplasts — the bulb grows underground.";
+SPECIMENS.elodea.reveal = "Pondweed leaf: cell walls, a large vacuole and many green chloroplasts.";
+var CHALLENGE_SPECS = ["cheek", "onion", "elodea", "blood", "root"];
+var COURSE_SPECS = { g1: ["cheek"], g23: ["cheek", "onion", "elodea"] };
+var COURSE_NAME = { g1: "G1 Science", g23: "G2/G3 Science" };
+
+/* Microscope physics */
+var FOCUS = { 4: 61.2, 10: 62.6, 40: 63.4 };        // stage height for sharp focus
+var DOF = { 4: 0.9, 10: 1.7, 40: 3.2 };           // blur (px) per unit off focus
+var IDEAL_AP = { 4: 35, 10: 50, 40: 70 };         // best diaphragm opening
+var COARSE = 2.5, FINE = 0.2;
+
+/* ------------------------------------------------------------------
+   STATE
+------------------------------------------------------------------ */
+var G = null;   // game
+var M = null;   // microscope
+
+function newGame(course) {
+  G = { mode: "lab", profile: G && G.profile, course: course, partsOrder: [], partsIdx: 0, partsFirst: 0, partsWrongNow: false, partsMissed: [],
+        mistakes: 0, done: {}, labelFirst: 0, labelTotal: 0, spellSlips: 0, spec: null };
+}
+function newScope() {
+  M = { light: false, slide: false, obj: 4, h: 0, ap: 100, coarseAng: 0, fineAng: 0, cx: null, cy: null,
+        light4: false, fineUsed4: false, coarse4: false, fine4: false, fine10: false, fine40: false, light40: false };
+}
+
+/* ------------------------------------------------------------------
+   HELPERS
+------------------------------------------------------------------ */
+function $(id) { return document.getElementById(id); }
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function show(id) {
+  ["scrStart", "scrParts", "scrMenu", "scrLab", "scrLabel", "scrResults"].forEach(function (s) { $(s).hidden = s !== id; });
+  $("scoreboard").hidden = id === "scrStart";
+  window.scrollTo(0, 0);
+}
+function coach(el, text, mood) {
+  el.textContent = text;
+  el.classList.remove("warn", "good");
+  void el.offsetWidth;
+  if (mood) el.classList.add(mood);
+}
+function updateSB(title) {
+  $("sbTimer").hidden = !(G && G.mode === "challenge");
+  if (title) $("sbTitle").textContent = title;
+  $("sbCourse").textContent = COURSE_NAME[G.course];
+  $("sbMist").textContent = "⚠ Mistakes: " + G.mistakes;
+}
+function mistake(text) {
+  Sound.bad();
+  G.mistakes++;
+  if (G.mode === "challenge" && CH) CH.slides[CH.idx].mistakes++;
+  updateSB();
+  coach($("labCoach"), "⚠ " + text, "warn");
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+/* hold-to-repeat buttons */
+function holdable(btn, fn) {
+  var t1 = null, t2 = null;
+  function stop() { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; }
+  btn.addEventListener("pointerdown", function (e) {
+    e.preventDefault(); stop();
+    if (fn() === false) return;
+    t1 = setTimeout(function () { t2 = setInterval(function () { if (fn() === false) stop(); }, 80); }, 320);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(function (ev) { btn.addEventListener(ev, stop); });
+  btn.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } });
+}
+
+/* ------------------------------------------------------------------
+   MICROSCOPE SVG
+------------------------------------------------------------------ */
+function scopeSVG(mode) {
+  // mode: "id" (identify parts) or "lab"
+  return '' +
+  '<svg class="scope-svg" viewBox="0 0 300 420" role="img" aria-label="Light microscope">' +
+  '<defs><radialGradient id="glow' + mode + '"><stop offset="0" stop-color="#FCE883" stop-opacity=".95"/><stop offset="1" stop-color="#FCE883" stop-opacity="0"/></radialGradient></defs>' +
+  // base
+  '<g class="part" data-part="base"><path d="M40 382 Q40 372 52 372 L262 372 Q274 372 274 382 L274 400 Q274 408 266 408 L48 408 Q40 408 40 400 Z" fill="#069494" stroke="#1d2626" stroke-width="3"/></g>' +
+  // light switch (part of light source)
+  '<g class="part" data-part="light" data-act="light"><rect x="238" y="382" width="22" height="13" rx="4" fill="#fff" stroke="#1d2626" stroke-width="2.5"/><rect id="sw' + mode + '" x="241" y="385" width="8" height="7" rx="2" fill="#1d2626"/></g>' +
+  // arm
+  '<g class="part" data-part="arm"><path d="M62 372 L62 300 Q58 210 78 150 Q96 104 150 96 L158 120 Q114 130 102 168 Q90 210 96 300 L100 372 Z" fill="#069494" stroke="#1d2626" stroke-width="3" stroke-linejoin="round"/></g>' +
+  // lamp
+  '<g class="part" data-part="light" data-act="light"><circle id="glowC' + mode + '" cx="178" cy="356" r="34" fill="url(#glow' + mode + ')" opacity="0"/>' +
+  '<path d="M156 372 Q156 344 178 344 Q200 344 200 372 Z" fill="#fff" stroke="#1d2626" stroke-width="3"/><path id="bulb' + mode + '" d="M166 372 Q166 354 178 354 Q190 354 190 372 Z" fill="#e3e8e8" stroke="#1d2626" stroke-width="2"/></g>' +
+  // moving stage group
+  '<g id="stageG' + mode + '">' +
+    // bracket from arm
+    '<path d="M96 300 L126 300 L126 312 L98 312 Z" fill="#9fb3b3" stroke="#1d2626" stroke-width="2.5"/>' +
+    // diaphragm / condenser under stage
+    '<g class="part" data-part="diaphragm" data-act="dia"><rect x="158" y="300" width="40" height="13" rx="3" fill="#cfd8d8" stroke="#1d2626" stroke-width="2.5"/>' +
+    '<line x1="178" y1="313" x2="178" y2="318" stroke="#1d2626" stroke-width="2.5"/><rect id="lever' + mode + '" x="196" y="305" width="22" height="5" rx="2.5" fill="#FF8243" stroke="#1d2626" stroke-width="2"/></g>' +
+    // stage
+    '<g class="part" data-part="stage" data-act="slide"><rect x="110" y="286" width="142" height="14" rx="3" fill="#2f3b3b" stroke="#1d2626" stroke-width="3"/></g>' +
+    // slide
+    '<g id="slide' + mode + '" opacity="0"><rect x="136" y="280" width="84" height="6" rx="1" fill="#d8f1f6" stroke="#1d2626" stroke-width="1.8"/><rect x="170" y="281" width="16" height="4" fill="#9ec1ff" opacity=".9"/></g>' +
+    // clips
+    '<g class="part" data-part="clips" data-act="slide"><path d="M118 284 L150 280 L150 285 L118 289 Z" fill="#cfd8d8" stroke="#1d2626" stroke-width="2"/><circle cx="120" cy="286" r="3.5" fill="#1d2626"/>' +
+    '<path d="M244 284 L212 280 L212 285 L244 289 Z" fill="#cfd8d8" stroke="#1d2626" stroke-width="2"/><circle cx="242" cy="286" r="3.5" fill="#1d2626"/></g>' +
+  '</g>' +
+  // body tube
+  '<rect x="150" y="70" width="40" height="112" rx="4" fill="#069494" stroke="#1d2626" stroke-width="3"/>' +
+  // eyepiece
+  '<g class="part" data-part="eyepiece"><rect x="156" y="22" width="28" height="50" rx="3" fill="#FFC0CB" stroke="#1d2626" stroke-width="3"/><rect x="152" y="16" width="36" height="10" rx="3" fill="#1d2626"/><text x="170" y="52" text-anchor="middle" font-size="10" font-weight="800" fill="#1d2626">10×</text></g>' +
+  // objectives (rebuilt)
+  '<g id="objG' + mode + '"></g>' +
+  // nosepiece
+  '<g class="part" data-part="nosepiece" data-act="nose"><path d="M138 182 L202 182 L194 200 L146 200 Z" fill="#cfd8d8" stroke="#1d2626" stroke-width="3" stroke-linejoin="round"/></g>' +
+  // knobs
+  // coarse knob (large) with the fine knob mounted in its centre
+  '<g class="part knob" data-part="coarse" data-act="coarse"><circle cx="80" cy="250" r="24" fill="#FF8243" stroke="#1d2626" stroke-width="3"/><g id="coarseMark' + mode + '"><line x1="80" y1="229" x2="80" y2="236" stroke="#1d2626" stroke-width="3.5" stroke-linecap="round"/></g></g>' +
+  '<g class="part knob" data-part="fine" data-act="fine"><circle cx="80" cy="250" r="11" fill="#FCE883" stroke="#1d2626" stroke-width="3"/><g id="fineMark' + mode + '"><line x1="80" y1="250" x2="80" y2="241" stroke="#1d2626" stroke-width="2.5" stroke-linecap="round"/></g></g>' +
+  '</svg>';
+}
+
+function objectivesSVG(obj) {
+  // active objective hangs straight down; other two are angled behind
+  var len = { 4: 22, 10: 32, 40: 44 };
+  var col = { 4: "#d64545", 10: "#FCE883", 40: "#4b8be0" };
+  var order = [4, 10, 40];
+  var others = order.filter(function (o) { return o !== obj; });
+  var s = '<g class="part" data-part="objective" data-act="nose">';
+  others.forEach(function (o, i) {
+    var ang = i === 0 ? 28 : -28;
+    s += '<g transform="rotate(' + ang + ' 170 196)"><rect x="161" y="196" width="18" height="' + len[o] + '" rx="3" fill="#e3e8e8" stroke="#1d2626" stroke-width="2.5"/>' +
+         '<rect x="161" y="' + (196 + len[o] - 8) + '" width="18" height="4" fill="' + col[o] + '"/></g>';
+  });
+  s += '<rect x="159" y="196" width="22" height="' + len[obj] + '" rx="3" fill="#fff" stroke="#1d2626" stroke-width="3"/>' +
+       '<rect x="159" y="' + (196 + len[obj] - 9) + '" width="22" height="5" fill="' + col[obj] + '" stroke="#1d2626" stroke-width="1"/>' +
+       '<rect x="163" y="' + (196 + len[obj]) + '" width="14" height="4" rx="1.5" fill="#1d2626"/>' +
+       '<text x="170" y="' + (196 + Math.min(len[obj] - 12, 18)) + '" text-anchor="middle" font-size="8.5" font-weight="800" fill="#1d2626">' + obj + '×</text></g>';
+  return s;
+}
+
+/* ------------------------------------------------------------------
+   PROFILE, BADGES (saved in this browser only)
+------------------------------------------------------------------ */
+var STORE_KEY = "scienceiskhool.microscopeLab.v1";
+function loadStore() { try { var o = JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); return o && typeof o === "object" ? o : {}; } catch (e) { return {}; } }
+function saveStore(o) { try { localStorage.setItem(STORE_KEY, JSON.stringify(o)); return true; } catch (e) { return false; } }
+var CLASSES = (function () { var v = ["Charity", "Courage", "Faith", "Hope", "Humility", "Integrity", "Joy", "Love", "Respect"], out = []; ["S1", "S2", "S3", "S4"].forEach(function (l) { v.forEach(function (x) { out.push(l + " " + x); }); }); out.push("5 Faith"); return out; })();
+$("pClass").insertAdjacentHTML("beforeend", CLASSES.map(function (c) { return '<option value="' + c + '">' + c + "</option>"; }).join(""));
+function readProfile() { return { name: $("pName").value.replace(/\s+/g, " ").trim(), cls: $("pClass").value, reg: String(parseInt($("pReg").value, 10) || "") }; }
+function pid(p) { return [p.name.toLowerCase(), p.cls, p.reg].join("|"); }
+function profileError(p) {
+  if (p.name.length < 2) return "Type your name first.";
+  if (!p.cls) return "Choose your class.";
+  if (!p.reg || +p.reg < 1 || +p.reg > 50) return "Type your register number.";
+  return "";
+}
+function fmtDate(t) { var d = new Date(t); return d.toLocaleDateString("en-SG", { day: "numeric", month: "short", year: "numeric" }) + ", " + d.toLocaleTimeString("en-SG", { hour: "numeric", minute: "2-digit" }); }
+function medalSVG(course) {
+  var ribbon = course === "g1" ? "#FF8243" : "#069494";
+  return '<svg viewBox="0 0 80 96" aria-hidden="true"><path d="M22 2 L36 2 L46 34 L32 38 Z" fill="' + ribbon + '" stroke="#1d2626" stroke-width="2.5" stroke-linejoin="round"/><path d="M58 2 L44 2 L34 34 L48 38 Z" fill="#FFC0CB" stroke="#1d2626" stroke-width="2.5" stroke-linejoin="round"/>' +
+    '<circle cx="40" cy="62" r="29" fill="#FCE883" stroke="#1d2626" stroke-width="3"/><circle cx="40" cy="62" r="21" fill="#fff" stroke="#1d2626" stroke-width="2"/>' +
+    // little microscope
+    '<g fill="#069494" stroke="#1d2626" stroke-width="1.6" stroke-linejoin="round"><rect x="38" y="47" width="7" height="14" rx="1.5" transform="rotate(-18 41 54)"/><path d="M33 75 L50 75 L50 79 L31 79 Z"/><path d="M36 75 Q30 66 36 58 L39 60 Q35 66 40 75 Z"/><rect x="38" y="66" width="12" height="3"/></g></svg>';
+}
+function badgeHTML(course, rec, p, best) {
+  return '<div class="badgecard">' + medalSVG(course) + '<div style="min-width:0"><div class="bs">' + COURSE_NAME[course] + '</div><div class="bt">Microscope Pre-Lab complete</div>' +
+    '<div class="who">' + esc(p.name) + " · " + esc(p.cls) + " · Reg " + esc(p.reg) + '</div><div class="when">Earned ' + esc(fmtDate(rec.t)) + "</div>" +
+    (best ? '<div class="best">🏁 Challenge best: ' + best.score + " pts (" + fmtTime(best.secs) + ")</div>" : "") + "</div></div>";
+}
+function fmtTime(sec) { sec = Math.round(sec); return Math.floor(sec / 60) + ":" + ("0" + (sec % 60)).slice(-2); }
+function renderStart() {
+  var p = readProfile(), st = loadStore(), id = pid(p), html = "", any = false;
+  var valid = !profileError(p);
+  ["g1", "g23"].forEach(function (c) {
+    var rec = valid && st.badges && st.badges[id + "|" + c];
+    if (rec) { any = true; html += badgeHTML(c, rec, p, st.best && st.best[id + "|" + c]); }
+  });
+  $("badges").innerHTML = html;
+  var btns = "";
+  ["g1", "g23"].forEach(function (c) {
+    var has = valid && st.badges && st.badges[id + "|" + c];
+    btns += '<button class="btn ' + (has ? "orange" : "ghost") + '" data-chal="' + c + '"' + (has ? "" : " disabled") + ">" + (has ? "" : "🔒 ") + COURSE_NAME[c] + " challenge</button>";
+  });
+  $("chalBtns").innerHTML = btns + (any ? "" : '<p class="lock">Locked — earn your Pre-Lab badge first.</p>');
+  $("chalBtns").querySelectorAll("[data-chal]").forEach(function (b) { b.addEventListener("click", function () { startChallenge(b.getAttribute("data-chal")); }); });
+}
+(function initProfile() {
+  var st = loadStore();
+  if (st.profile) { $("pName").value = st.profile.name || ""; $("pClass").value = st.profile.cls || ""; $("pReg").value = st.profile.reg || ""; }
+  ["pName", "pClass", "pReg"].forEach(function (id) {
+    $(id).addEventListener("input", function () { $("pErr").textContent = ""; renderStart(); });
+    $(id).addEventListener("change", function () { var s2 = loadStore(); s2.profile = readProfile(); saveStore(s2); });
+  });
+  renderStart();
+})();
+function requireProfile() {
+  var p = readProfile(), e = profileError(p);
+  $("pErr").textContent = e;
+  if (e) { (p.name.length < 2 ? $("pName") : !p.cls ? $("pClass") : $("pReg")).focus(); return null; }
+  var st = loadStore(); st.profile = p; saveStore(st);
+  return p;
+}
+function awardBadge() {
+  var st = loadStore(), id = pid(G.profile) + "|" + G.course;
+  st.badges = st.badges || {};
+  if (!st.badges[id]) st.badges[id] = { t: Date.now() };
+  var ok = saveStore(st);
+  return { rec: st.badges[id], saved: ok, best: st.best && st.best[id] };
+}
+function goStart() { stopTimer(); Music.stop(); Confetti.stop(); if (G) G.mode = "lab"; renderStart(); show("scrStart"); }
+
+/* ------------------------------------------------------------------
+   SOUND, MUSIC, CONFETTI
+------------------------------------------------------------------ */
+var MUSIC_FILE = "challenge.mp3";   // challenge-mode music, in the same folder as this page
+var MUSIC_VOLUME = 0.25;            // 0 to 1
+function prefGet(k, d) { var st = loadStore(); return st.prefs && k in st.prefs ? st.prefs[k] : d; }
+function prefSet(k, v) { var st = loadStore(); st.prefs = st.prefs || {}; st.prefs[k] = v; saveStore(st); }
+var Sound = {
+  on: prefGet("sound", true), ctx: null,
+  tone: function (f, type, dur, vol, delay) {
+    if (!this.on) return;
+    try {
+      this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (this.ctx.state === "suspended") this.ctx.resume();
+      var c = this.ctx, t = c.currentTime + (delay || 0), o = c.createOscillator(), g = c.createGain();
+      o.type = type; o.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + .02);
+    } catch (e) {}
+  },
+  tick: function (fine) { this.tone(fine ? 1600 : 900, "square", .015, .012); },                 // knob click
+  pop: function () { this.tone(520, "triangle", .07, .06); },                                     // small step done
+  ok: function () { this.tone(660, "square", .09, .06); this.tone(990, "square", .14, .06, .08); },   // right
+  spell: function () { this.tone(520, "triangle", .1, .06); this.tone(440, "triangle", .14, .05, .09); },  // nearly right
+  bad: function () { this.tone(180, "square", .2, .07); this.tone(150, "square", .2, .05, .06); },     // wrong
+  win: function () { [523, 659, 784, 1047, 784, 1047].forEach(function (n, i) { Sound.tone(n, "square", .14, .06, i * .12); }); }
+};
+var Music = {
+  el: $("music"), on: prefGet("music", true), vol: MUSIC_VOLUME, wanted: false,
+  start: function () { this.wanted = true; if (!this.el.getAttribute("src")) this.el.src = MUSIC_FILE; try { this.el.currentTime = 0; } catch (e) {} this.play(); },
+  play: function () { if (!this.on || !this.wanted) return; clearInterval(this.fade); try { this.el.volume = this.vol; var pr = this.el.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} },
+  stop: function () { this.wanted = false; clearInterval(this.fade); try { this.el.pause(); this.el.volume = this.vol; } catch (e) {} },
+  fadeOut: function () {
+    var el = this.el, self = this, v = el.volume; this.wanted = false;
+    clearInterval(this.fade);
+    this.fade = setInterval(function () { v -= .03; if (v <= 0) { clearInterval(self.fade); try { el.pause(); el.volume = self.vol; } catch (e) {} } else el.volume = v; }, 60);
+  }
+};
+document.addEventListener("visibilitychange", function () { if (document.hidden) { try { Music.el.pause(); } catch (e) {} } else Music.play(); });
+function paintSound() {
+  $("btnSound").classList.toggle("off", !Sound.on); $("btnSound").setAttribute("aria-label", Sound.on ? "Sound effects on" : "Sound effects off");
+  $("btnMusic").classList.toggle("off", !Music.on); $("btnMusic").setAttribute("aria-label", Music.on ? "Music on" : "Music off");
+}
+$("btnSound").addEventListener("click", function () { Sound.on = !Sound.on; prefSet("sound", Sound.on); paintSound(); if (Sound.on) Sound.pop(); });
+$("btnMusic").addEventListener("click", function () { Music.on = !Music.on; prefSet("music", Music.on); paintSound(); if (!Music.on) { try { Music.el.pause(); } catch (e) {} } else Music.play(); });
+paintSound();
+var Confetti = {
+  c: $("confetti"), p: [], on: false,
+  go: function () {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var c = this.c, w = c.width = innerWidth, h = c.height = innerHeight, cols = ["#FF8243", "#FFC0CB", "#FCE883", "#069494", "#1d2626"];
+    c.hidden = false; this.on = true; this.p = [];
+    for (var i = 0; i < 140; i++) this.p.push({ x: Math.random() * w, y: -Math.random() * h, s: 6 + Math.random() * 8, v: 2 + Math.random() * 3, a: Math.random() * 6, col: cols[i % cols.length] });
+    var self = this, ctx = c.getContext("2d"), t0 = performance.now();
+    (function frame(t) {
+      if (!self.on) return;
+      ctx.clearRect(0, 0, w, h);
+      self.p.forEach(function (q) { q.y += q.v; q.a += .1; ctx.fillStyle = q.col; ctx.fillRect(q.x + Math.sin(q.a) * 6, q.y, q.s, q.s * .6); });
+      if (t - t0 < 4500) requestAnimationFrame(frame); else self.stop();
+    })(t0);
+  },
+  stop: function () { this.on = false; this.c.hidden = true; }
+};
+function celebrate() { Sound.win(); Confetti.go(); }
+
+/* ------------------------------------------------------------------
+   START
+------------------------------------------------------------------ */
+document.querySelectorAll("[data-course]").forEach(function (b) {
+  b.addEventListener("click", function () { var p = requireProfile(); if (!p) return; newGame(b.getAttribute("data-course")); G.profile = p; startParts(); });
+});
+$("btnHome").addEventListener("click", function () {
+  if (G && G.mode === "challenge") { goStart(); return; }
+  if (G && G.partsOrder.length && G.partsIdx >= G.partsOrder.length) { showMenu(true); } else { goStart(); }
+});
+
+/* ------------------------------------------------------------------
+   1. IDENTIFY PARTS
+------------------------------------------------------------------ */
+function startParts() {
+  G.partsOrder = shuffle(partsFor(G.course).map(function (p) { return p.id; }));
+  G.partsIdx = 0; G.partsFirst = 0; G.partsMissed = []; G.partsWrongNow = false;
+  $("idScopeHost").innerHTML = scopeSVG("id");
+  $("objGid").innerHTML = objectivesSVG(4);
+  $("slideid").setAttribute("opacity", "1");
+  $("idFound").innerHTML = ""; $("idFn").hidden = true; $("idNext").hidden = true;
+  coach($("idCoach"), "Tap the part of the microscope I name. Get it right first time to score!");
+  $("idScopeHost").querySelector("svg").addEventListener("click", onIdTap);
+  updateSB("Step 1 · Parts of a microscope");
+  show("scrParts");
+  askPart();
+}
+var G1_SKIP = { nosepiece: "objective", clips: "stage" };   // G1 syllabus: these are not tested; taps count as the neighbouring part
+function partsFor(course) { return PARTS.filter(function (p) { return course !== "g1" || !G1_SKIP[p.id]; }); }
+function partById(id) { for (var i = 0; i < PARTS.length; i++) if (PARTS[i].id === id) return PARTS[i]; }
+function askPart() {
+  $("idBar").style.width = (G.partsIdx / G.partsOrder.length * 100) + "%";
+  if (G.partsIdx >= G.partsOrder.length) {
+    $("idPrompt").innerHTML = "All " + G.partsOrder.length + " parts found! You got <b>" + G.partsFirst + "/" + G.partsOrder.length + "</b> right first time.";
+    coach($("idCoach"), G.partsFirst === G.partsOrder.length ? "Perfect! You know your microscope. Let's use it." : "Well done! Remember the ones in pink — you'll use them all in the next step.", "good");
+    $("idNext").hidden = false;
+    return;
+  }
+  G.partsWrongNow = false;
+  $("idPrompt").innerHTML = "Tap the <b>" + esc(partById(G.partsOrder[G.partsIdx]).name) + "</b>";
+}
+function flash(g, cls) { g.classList.remove("flash-good", "flash-bad"); void g.getBBox(); g.classList.add(cls); setTimeout(function () { g.classList.remove(cls); }, 900); }
+function onIdTap(e) {
+  if (G.partsIdx >= G.partsOrder.length) return;
+  var g = e.target.closest("[data-part]"); if (!g) return;
+  var tapped = g.getAttribute("data-part"), want = G.partsOrder[G.partsIdx];
+  if (G.course === "g1" && G1_SKIP[tapped]) tapped = G1_SKIP[tapped];
+  if (tapped === want) {
+    flash(g, "flash-good");
+    if (!G.partsWrongNow) G.partsFirst++; else G.partsMissed.push(want);
+    var p = partById(want);
+    $("idFn").hidden = false; $("idFnT").textContent = p.name.charAt(0).toUpperCase() + p.name.slice(1); $("idFnD").textContent = p.fn;
+    var chip = document.createElement("span"); chip.textContent = p.name; if (G.partsWrongNow) chip.className = "miss";
+    $("idFound").appendChild(chip);
+    coach($("idCoach"), G.partsWrongNow ? "Got it this time!" : "Correct!", "good");
+    Sound.ok();
+    G.partsIdx++; askPart();
+  } else {
+    flash(g, "flash-bad");
+    G.partsWrongNow = true;
+    coach($("idCoach"), "Not quite — that's the " + partById(tapped).name + ". Try again!", "warn");
+    Sound.bad();
+  }
+}
+$("idNext").addEventListener("click", function () { showMenu(); });
+
+/* ------------------------------------------------------------------
+   2. SPECIMEN MENU
+------------------------------------------------------------------ */
+function showMenu(stay) {
+  var specs = COURSE_SPECS[G.course];
+  var html = "";
+  specs.forEach(function (k, i) {
+    var s = SPECIMENS[k];
+    html += '<button class="chip' + (G.done[k] ? " done" : "") + '" data-spec="' + k + '"><span class="k">Slide ' + (i + 1) + " · " + s.kind + '</span><span class="t">' + esc(s.title) + '</span><span class="d">' + esc(s.stain.charAt(0).toUpperCase() + s.stain.slice(1)) + "</span></button>";
+  });
+  $("menuChoices").innerHTML = html;
+  $("menuChoices").querySelectorAll("[data-spec]").forEach(function (b) { b.addEventListener("click", function () { startLab(b.getAttribute("data-spec")); }); });
+  var allDone = specs.every(function (k) { return G.done[k]; });
+  $("btnFinish").hidden = !allDone;
+  $("btnReParts").hidden = false;
+  updateSB("Step 2 · Choose a slide");
+  show("scrMenu");
+  if (specs.length === 1 && !allDone && stay !== true) startLab(specs[0]);
+}
+$("btnFinish").addEventListener("click", showResults);
+$("btnReParts").addEventListener("click", startParts);
+
+/* ------------------------------------------------------------------
+   TEXTURES (photo, or drawn fallback)
+------------------------------------------------------------------ */
+var TEX = {};   // key -> { src: canvas|img, w, h, photo: bool, pattern: {ctxId: CanvasPattern}, mirror: canvas }
+
+function loadTexture(key, cb) {
+  if (TEX[key]) return cb(TEX[key]);
+  var list = SPECIMENS[key].photos.slice();
+  (function next() {
+    if (!list.length) { TEX[key] = makeTex(drawnSpecimen(key), false); if (key === "root") TEX[key].startX = 0.38; return cb(TEX[key]); }
+    var url = list.shift(), img = new Image(), done = false;
+    var timer = setTimeout(function () { if (!done) { done = true; next(); } }, 8000);
+    img.onload = function () { if (done) return; done = true; clearTimeout(timer); TEX[key] = makeTex(img, true, url); cb(TEX[key]); };
+    img.onerror = function () { if (done) return; done = true; clearTimeout(timer); next(); };
+    img.src = url;
+  })();
+}
+function makeTex(src, photo, url) {
+  var w = src.naturalWidth || src.width, h = src.naturalHeight || src.height;
+  // mirror-tile 2x2 so the repeat has no hard seams
+  var m = document.createElement("canvas"); m.width = w * 2; m.height = h * 2;
+  var c = m.getContext("2d");
+  c.drawImage(src, 0, 0, w, h);
+  c.save(); c.translate(w * 2, 0); c.scale(-1, 1); c.drawImage(src, 0, 0, w, h); c.restore();
+  c.save(); c.translate(0, h * 2); c.scale(1, -1); c.drawImage(src, 0, 0, w, h); c.restore();
+  c.save(); c.translate(w * 2, h * 2); c.scale(-1, -1); c.drawImage(src, 0, 0, w, h); c.restore();
+  return { w: w, h: h, mirror: m, photo: photo, url: url || null };
+}
+
+/* seeded random so drawings are stable */
+function rng(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+function drawnSpecimen(key) {
+  var S = 900, cv = document.createElement("canvas"); cv.width = S; cv.height = S;
+  var c = cv.getContext("2d"), r = rng({ cheek: 7, onion: 11, elodea: 13, blood: 17, root: 19 }[key] || 5);
+  if (key === "blood") {
+    c.fillStyle = "#f6e9ec"; c.fillRect(0, 0, S, S);
+    var placed = [];
+    for (var t = 0; t < 2500 && placed.length < 150; t++) {
+      var bx = r() * S, by = r() * S, br = 19 + r() * 5, ok = true;
+      for (var q = 0; q < placed.length; q++) { var dx = placed[q][0] - bx, dy = placed[q][1] - by; if (dx * dx + dy * dy < Math.pow(placed[q][2] + br - 6, 2)) { ok = false; break; } }
+      if (ok) placed.push([bx, by, br]);
+    }
+    placed.forEach(function (p, i) {
+      if (i % 22 === 7) {   // a few white blood cells
+        c.beginPath(); c.arc(p[0], p[1], p[2] + 12, 0, 7); c.fillStyle = "#e3d5ee"; c.fill(); c.lineWidth = 2.5; c.strokeStyle = "#9b7fb8"; c.stroke();
+        c.fillStyle = "#5b3290";
+        [[-9, -6], [7, -8], [2, 9]].forEach(function (o) { c.beginPath(); c.ellipse(p[0] + o[0], p[1] + o[1], 10, 8, r() * 3, 0, 7); c.fill(); });
+        return;
+      }
+      c.beginPath(); c.arc(p[0], p[1], p[2], 0, 7); c.fillStyle = "#e58e9f"; c.fill(); c.lineWidth = 2; c.strokeStyle = "#c0607a"; c.stroke();
+      c.beginPath(); c.arc(p[0], p[1], p[2] * 0.45, 0, 7); c.fillStyle = "#f3c5cf"; c.fill();
+    });
+  } else if (key === "root") {
+    // Root cross-section (like a stained root slide): root hairs reach out into the clear mounting
+    // medium from one layer of epidermis cells; behind them are large, rounded, blue-stained cortex cells.
+    c.fillStyle = "#f3efe4"; c.fillRect(0, 0, S, S);
+    var edge = function (y) { return 330 + 40 * Math.sin(y / 170) + 18 * Math.sin(y / 61); };
+    // cortex: hex packing of big cells sharing walls, blue
+    c.beginPath(); c.moveTo(S, 0); for (var yy = 0; yy <= S; yy += 10) c.lineTo(edge(yy) + 40, yy); c.lineTo(S, S); c.closePath();
+    c.fillStyle = "#3f7fd0"; c.fill();
+    var R = 42, rowH = R * 1.5;
+    for (var ry = -1; ry * rowH < S + R; ry++) {
+      for (var rx = -1; rx * R * 1.73 < S + R; rx++) {
+        var cx = rx * R * 1.73 + (Math.abs(ry) % 2 ? R * 0.87 : 0), cy = ry * rowH;
+        if (cx + R * 0.5 < edge(cy) + 54) continue;
+        var rr = R;
+        c.beginPath();
+        for (var k = 0; k <= 6; k++) { var an = k / 6 * Math.PI * 2 + 0.52, jx = cx + Math.cos(an) * rr, jy = cy + Math.sin(an) * rr; if (k === 0) c.moveTo(jx, jy); else c.lineTo(jx, jy); }
+        c.closePath();
+        var gr = c.createRadialGradient(cx - 6, cy - 6, 4, cx, cy, rr);
+        gr.addColorStop(0, "#f2f7ff"); gr.addColorStop(0.65, "#bcd6f6"); gr.addColorStop(1, "#5d97df");
+        c.fillStyle = gr; c.fill(); c.lineJoin = "round"; c.lineWidth = 5; c.strokeStyle = "#2f6fc4"; c.stroke();
+        if (r() < 0.25) { c.beginPath(); c.ellipse(cx + (r() - .5) * 20, cy + (r() - .5) * 20, 6, 5, 0, 0, 7); c.fillStyle = "rgba(47,111,196,.55)"; c.fill(); }
+      }
+    }
+    // root hairs first (so the epidermis wall sits on top of their base)
+    var cellH = 46, cells = [];
+    for (var y0 = -cellH; y0 < S + cellH; y0 += cellH) cells.push(y0 + (r() - .5) * 6);
+    cells.forEach(function (y) {
+      if (r() > 0.62) return;
+      var ex = edge(y + cellH / 2), bx = ex - 30, by = y + cellH / 2;
+      var ang = Math.PI + (r() - .5) * 0.8, len = 110 + r() * 200, bend = (r() - .5) * 60;
+      var tx = bx + Math.cos(ang) * len, ty = by + Math.sin(ang) * len, mx = (bx + tx) / 2, my = (by + ty) / 2 + bend;
+      c.lineCap = "round";
+      c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(mx, my, tx, ty); c.lineWidth = 20; c.strokeStyle = "#9b4a7c"; c.stroke();
+      c.beginPath(); c.moveTo(bx, by); c.quadraticCurveTo(mx, my, tx, ty); c.lineWidth = 14; c.strokeStyle = "#e3c7d8"; c.stroke();
+      c.lineCap = "butt";
+    });
+    // epidermis (outer layer, pink-purple walls) and the layer just inside it (deeper red walls)
+    cells.forEach(function (y) {
+      var ex = edge(y + cellH / 2);
+      c.fillStyle = "rgba(232,196,214,.9)"; c.fillRect(ex - 36, y, 38, cellH - 2);
+      c.lineWidth = 3.5; c.strokeStyle = "#9b3a74"; c.strokeRect(ex - 36, y, 38, cellH - 2);
+      c.fillStyle = "rgba(241,222,232,.95)"; c.fillRect(ex + 4, y + cellH / 2 - 2, 50, cellH - 2);
+      c.lineWidth = 4; c.strokeStyle = "#b02a55"; c.strokeRect(ex + 4, y + cellH / 2 - 2, 50, cellH - 2);
+    });
+  } else if (key === "cheek") {
+    c.fillStyle = "#eef2f7"; c.fillRect(0, 0, S, S);
+    var centres = [[180, 200], [520, 160], [760, 380], [330, 520], [640, 700], [150, 760], [430, 860], [860, 820], [60, 470], [880, 90]];
+    centres.forEach(function (p) {
+      var R = 120 + r() * 50, n = 11, pts = [];
+      for (var i = 0; i < n; i++) { var a = i / n * Math.PI * 2, rr = R * (0.78 + r() * 0.35); pts.push([p[0] + Math.cos(a) * rr * 1.1, p[1] + Math.sin(a) * rr * 0.9]); }
+      c.beginPath();
+      for (i = 0; i <= n; i++) { var A = pts[i % n], B = pts[(i + 1) % n], mx = (A[0] + B[0]) / 2, my = (A[1] + B[1]) / 2; if (i === 0) c.moveTo(mx, my); else c.quadraticCurveTo(A[0], A[1], mx, my); }
+      c.closePath();
+      c.fillStyle = "rgba(118,150,214,.32)"; c.fill();
+      c.lineWidth = 3; c.strokeStyle = "rgba(55,85,160,.75)"; c.stroke();
+      for (i = 0; i < 40; i++) { c.fillStyle = "rgba(60,90,170," + (0.15 + r() * 0.25) + ")"; c.beginPath(); c.arc(p[0] + (r() - .5) * R, p[1] + (r() - .5) * R * 0.8, 1.5 + r() * 2.5, 0, 7); c.fill(); }
+      c.beginPath(); c.ellipse(p[0] + (r() - .5) * 30, p[1] + (r() - .5) * 30, 20 + r() * 6, 16 + r() * 5, r() * 3, 0, 7);
+      c.fillStyle = "rgba(35,55,140,.85)"; c.fill();
+    });
+  } else {
+    var plant = key === "elodea";
+    c.fillStyle = plant ? "#f1f6ea" : "#f7efd2"; c.fillRect(0, 0, S, S);
+    var cw = plant ? 225 : 300, ch = plant ? 90 : 112;
+    for (var row = -1; row * ch < S + ch; row++) {
+      var off = (row % 2) * cw * 0.5;
+      for (var col = -1; col * cw < S + cw; col++) {
+        var x = col * cw + off + (r() - .5) * 10, y = row * ch, w = cw - 6, h = ch - 6;
+        c.fillStyle = plant ? "#e3efd3" : "#f3dfa4"; c.fillRect(x + 4, y + 4, w - 4, h - 4);
+        c.fillStyle = plant ? "#fbfdf6" : "#fbf4dc"; c.fillRect(x + 16, y + 16, w - 28, h - 28);
+        c.lineWidth = 5; c.strokeStyle = plant ? "#7f9f6a" : "#b58a35"; c.strokeRect(x, y, w, h);
+        if (plant) {
+          var per = 2 * (w + h);
+          for (var k = 0; k < 26; k++) {
+            var t = (k / 26 + r() * 0.02) * per, px, py;
+            if (t < w) { px = x + t; py = y + 10; } else if (t < w + h) { px = x + w - 10; py = y + t - w; } else if (t < 2 * w + h) { px = x + w - (t - w - h); py = y + h - 10; } else { px = x + 10; py = y + h - (t - 2 * w - h); }
+            px = Math.min(Math.max(px, x + 12), x + w - 12); py = Math.min(Math.max(py, y + 11), y + h - 11);
+            c.beginPath(); c.ellipse(px, py, 8, 6, r() * 3, 0, 7); c.fillStyle = "#3f9b3a"; c.fill(); c.lineWidth = 1.5; c.strokeStyle = "#245f22"; c.stroke();
+          }
+        } else {
+          c.beginPath(); c.ellipse(x + 20 + r() * (w - 40), y + 20 + r() * (h - 40), 14, 11, 0, 0, 7);
+          c.fillStyle = "#a8701f"; c.fill(); c.lineWidth = 2; c.strokeStyle = "#6e4510"; c.stroke();
+        }
+      }
+    }
+  }
+  return cv;
+}
+
+/* ------------------------------------------------------------------
+   FIELD OF VIEW
+------------------------------------------------------------------ */
+var SCALE = { 4: 0.3, 10: 0.62, 40: 1.4 };   // fraction of field width covered by one photo width
+
+function sizeCanvas(cv) {
+  var dpr = Math.min(window.devicePixelRatio || 1, 2), w = cv.clientWidth || 300;
+  var px = Math.round(w * dpr);
+  if (cv.width !== px) { cv.width = px; cv.height = px; }
+  return px;
+}
+function focusAt(obj) { return FOCUS[obj] + (M && M.fshift || 0); }
+function idealAp(obj) { return Math.min(95, IDEAL_AP[obj] + (M && M.ashift || 0)); }
+function blurPx(obj, h) { return Math.min(14, Math.abs(h - focusAt(obj)) * DOF[obj]); }
+function lightOk(obj, ap) { return Math.abs(ap - idealAp(obj)) <= 15; }
+
+function renderField(cv, st, tex, cssScale) {
+  var px = sizeCanvas(cv), c = cv.getContext("2d");
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  if (!st.slide || !tex) { c.fillStyle = "#f6f3ea"; c.fillRect(0, 0, px, px); }
+  else {
+    if (st.cx === null) { st.cx = tex.w * (tex.startX || 0.5); st.cy = tex.h * 0.5; }
+    var s = px * SCALE[st.obj] / tex.w;
+    if (!tex.pat || tex.patCtx !== c) { tex.pat = c.createPattern(tex.mirror, "repeat"); tex.patCtx = c; }
+    c.fillStyle = "#000"; c.fillRect(0, 0, px, px);
+    c.save(); c.translate(px / 2, px / 2); c.scale(s, s); c.translate(-st.cx, -st.cy);
+    c.fillStyle = tex.pat;
+    c.fillRect(st.cx - px / 2 / s - 2, st.cy - px / 2 / s - 2, px / s + 4, px / s + 4);
+    c.restore();
+  }
+  var k = (cv.clientWidth || 300) / 360 * (cssScale || 1);
+  var bright = 0.45 + st.ap / idealAp(st.obj) * 0.55;
+  var contrast = 1.38 - st.ap / 100 * 0.62;
+  var b = st.slide ? blurPx(st.obj, st.h) * k : 0;
+  if (!st.light) { cv.style.filter = "brightness(0)"; return; }
+  cv.style.filter = "blur(" + b.toFixed(2) + "px) brightness(" + bright.toFixed(2) + ") contrast(" + contrast.toFixed(2) + ")";
+}
+
+/* ------------------------------------------------------------------
+   3. LAB
+------------------------------------------------------------------ */
+var labTex = null;
+
+function startLab(key) {
+  G.spec = key; newScope(); labTex = null;
+  var sp = SPECIMENS[key];
+  $("labScopeHost").innerHTML = scopeSVG("lab");
+  $("noseLab").textContent = G.course === "g1" ? "Objective lens" : "Revolving nosepiece";
+  bindScope();
+  var ch = G.mode === "challenge";
+  $("specNote").innerHTML = ch ? "<b>Mystery slide " + (CH.idx + 1) + " of " + CH.order.length + ".</b> Get a sharp, well-lit image at 40×." : "<b>Slide:</b> " + esc(sp.title) + ", " + esc(sp.stain) + ".";
+  $("labCredit").textContent = "";
+  $("steps").hidden = ch; $("idq").hidden = true; $("btnChNext").hidden = true; $("btnObserve").hidden = false;
+  $("btnObserve").textContent = ch ? (G.course === "g1" ? "Lock it in ▸" : "Identify this cell ▸") : "Draw & label this cell ▸";
+  if (ch) { M.fshift = Math.round((Math.random() * 14 - 5) * 10) / 10; M.ashift = Math.round(Math.random() * 20 - 10); CH.slideStart = Date.now(); CH.answered = false; }
+  updateSB(ch ? "Challenge · Slide " + (CH.idx + 1) + " of " + CH.order.length : "Step 3 · Use the microscope");
+  show("scrLab");
+  loadTexture(key, function (t) {
+    labTex = t;
+    if (G.mode !== "challenge") $("labCredit").innerHTML = t.photo ? 'Photo: <a href="' + sp.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>' : "Drawn view (photo could not load)";
+    refresh();
+  });
+  refresh();
+}
+
+function steps() {
+  return [
+    { t: "Switch on the light source.", ok: M.light },
+    { t: "Lowest objective (4×) in place, stage at its lowest. Place the slide on the stage" + (G.course === "g1" ? "." : " under the clips."), ok: M.slide },
+    { t: "Adjust the diaphragm so the light is just right.", ok: M.light4 },
+    { t: "Turn the coarse adjustment knob until you can see the cells.", ok: M.coarse4 },
+    { t: "Sharpen the image with the fine adjustment knob.", ok: M.fine4 },
+    { t: (G.course === "g1" ? "Change to the 10× objective lens" : "Turn the nosepiece to 10×") + " and refocus with the fine knob only.", ok: M.fine10 },
+    { t: (G.course === "g1" ? "Change to 40×" : "Turn to 40×") + ", refocus with the fine knob only, then adjust the diaphragm.", ok: M.fine40 && M.light40 }
+  ];
+}
+function hint() {
+  if (G.mode === "challenge") {
+    if (CH.answered) return null;
+    if (!M.light || !M.slide) return "Set up the microscope and find the cells. The clock is running!";
+    var ok40 = M.obj === 40 && blurPx(40, M.h) < 0.6 && lightOk(40, M.ap) && M.fine40;
+    return ok40 ? (G.course === "g1" ? "Sharp and well lit! Lock it in." : "Sharp and well lit! Now identify the cell.") : "Get a sharp, well-lit image at 40×.";
+  }
+  if (!M.light) return "First, switch on the light source.";
+  if (!M.slide) return "Place the slide on the stage. Tap the stage, or the “Place slide” button.";
+  var b = blurPx(M.obj, M.h), lo = lightOk(M.obj, M.ap);
+  if (M.obj === 4) {
+    if (!M.light4) return M.ap > idealAp(4) ? "Too bright — the cells look washed out. Close the diaphragm a little." : "Too dark. Open the diaphragm a little.";
+    if (!M.coarse4) return M.h < focusAt(4) ? "Raise the stage with the coarse knob until cells appear. Watch from the side!" : "You've gone past. Lower the stage with the coarse knob.";
+    if (!M.fine4) return "Nearly! Use the fine knob to make it sharp.";
+    return G.course === "g1" ? "Sharp! Now change to the 10× objective lens." : "Sharp! Now turn the nosepiece to the 10× objective.";
+  }
+  if (M.obj === 10) {
+    if (b >= 0.6) return "At 10×, refocus with the fine knob only.";
+    return G.course === "g1" ? "Sharp! Now change to the 40× objective lens." : "Sharp! Now turn the nosepiece to the 40× objective.";
+  }
+  if (b >= 0.6) return "At 40× use the fine knob only. Turn it slowly!";
+  if (!lo) return M.ap < idealAp(40) ? "High power needs more light. Open the diaphragm a little." : "A bit too bright — close the diaphragm slightly for better contrast.";
+  return "Beautiful! The cells are sharp at 400×. Tap “Draw & label this cell”.";
+}
+
+function evaluate() {
+  var b = blurPx(M.obj, M.h), lo = lightOk(M.obj, M.ap);
+  if (M.light && M.slide && M.obj === 4) {
+    if (lo) M.light4 = true;
+    if (b < 2.5) M.coarse4 = true;
+    if (b < 0.6 && M.coarse4 && M.fineUsed4) M.fine4 = true;
+  }
+  if (M.light && M.slide && M.obj === 10 && b < 0.6) M.fine10 = true;
+  if (M.light && M.slide && M.obj === 40) { if (b < 0.6) M.fine40 = true; M.light40 = M.fine40 && lo; }
+}
+
+var lastHintMood = null;
+function refresh(keepCoach) {
+  evaluate();
+  // svg
+  var dy = -M.h * 0.3;
+  $("stageGlab").setAttribute("transform", "translate(0," + dy.toFixed(2) + ")");
+  $("objGlab").innerHTML = objectivesSVG(M.obj);
+  $("slidelab").setAttribute("opacity", M.slide ? "1" : "0");
+  $("glowClab").setAttribute("opacity", M.light ? (0.3 + M.ap / 100 * 0.7).toFixed(2) : "0");
+  $("bulblab").setAttribute("fill", M.light ? "#FCE883" : "#e3e8e8");
+  $("swlab").setAttribute("x", M.light ? "249" : "241");
+  $("leverlab").setAttribute("x", (184 + M.ap * 0.22).toFixed(1));
+  $("coarseMarklab").setAttribute("transform", "rotate(" + M.coarseAng.toFixed(1) + " 80 250)");
+  $("fineMarklab").setAttribute("transform", "rotate(" + M.fineAng.toFixed(1) + " 80 250)");
+  $("dCoarse").querySelector(".rot").setAttribute("transform", "rotate(" + M.coarseAng.toFixed(1) + " 50 50)");
+  $("dFine").querySelector(".rot").setAttribute("transform", "rotate(" + M.fineAng.toFixed(1) + " 50 50)");
+  // controls
+  $("cLight").textContent = M.light ? "💡 On" : "💡 Off";
+  $("cLight").className = "btn " + (M.light ? "on" : "off");
+  $("cSlide").textContent = M.slide ? "Remove slide" : "Place slide";
+  document.querySelectorAll("[data-obj]").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-obj") === M.obj)); });
+  $("cDia").value = M.ap;
+  $("roObj").textContent = "Objective " + M.obj + "×";
+  $("roTot").textContent = "Total " + (M.obj * 10) + "×";
+  // steps
+  var st = steps(), cur = -1, html = "";
+  var nOk = st.filter(function (x) { return x.ok; }).length;
+  if (G.mode !== "challenge" && M.okCount !== undefined && nOk > M.okCount) Sound.pop();
+  M.okCount = nOk;
+  st.forEach(function (s, i) { if (!s.ok && cur < 0) cur = i; });
+  st.forEach(function (s, i) { html += '<li class="' + (s.ok ? "ok" : i === cur ? "cur" : "") + '">' + esc(s.t) + "</li>"; });
+  $("steps").innerHTML = html;
+  var ready = M.fine40 && M.light40 && M.obj === 40 && blurPx(40, M.h) < 0.6 && lightOk(40, M.ap);
+  $("btnObserve").disabled = !ready;
+  // field
+  var msg = "";
+  if (!M.light) msg = "It's dark… switch on the light source.";
+  else if (!M.slide) msg = "Just light — no slide on the stage yet.";
+  else if (!labTex) msg = "Loading slide…";
+  $("fovMsg").textContent = msg;
+  renderField($("fovCanvas"), M, labTex);
+  if (G.mode === "challenge" && CH.answered) $("btnObserve").disabled = true;
+  var h = hint();
+  if (!keepCoach && h !== null) coach($("labCoach"), h, ready ? "good" : null);
+}
+
+/* --- actions --- */
+function actLight() { M.light = !M.light; refresh(); }
+function actSlide() {
+  if (M.slide) {
+    if (M.obj !== 4) return mistake("Turn back to the lowest objective (4×) before removing the slide.");
+    M.slide = false; M.coarse4 = M.fine4 = M.fine10 = M.fine40 = M.light40 = false; refresh(); return;
+  }
+  if (M.obj !== 4) return mistake("Start with the lowest objective (4×) before placing the slide.");
+  if (M.h > 15) return mistake("Lower the stage first, so the slide does not hit the objective lens.");
+  M.slide = true; refresh();
+}
+function actObj(o) {
+  if (o === M.obj) return;
+  if (o > M.obj) {
+    if (!M.slide) return mistake("Place the slide and focus at low power first.");
+    if (o === 40 && M.obj === 4) return mistake("Go up one lens at a time: 4× → 10× → 40×.");
+    var need = M.obj === 4 ? M.fine4 : M.fine10;
+    if (!need || blurPx(M.obj, M.h) >= 0.6) return mistake("Get a sharp image at " + M.obj + "× before changing to a higher-power lens.");
+  }
+  M.obj = o;
+  refresh();
+}
+function move(dh, coarse) {
+  if (coarse && M.obj !== 4) { mistake("At " + M.obj + "× use the fine adjustment knob only — the coarse knob could crash the lens into the slide!"); return false; }
+  var before = M.h;
+  M.h = Math.round(Math.min(100, Math.max(0, M.h + dh)) * 100) / 100;
+  if (M.h === before) return false;
+  Sound.tick(!coarse);
+  if (coarse) M.coarseAng += dh > 0 ? 24 : -24;
+  else { M.fineAng += dh > 0 ? 15 : -15; if (M.obj === 4 && M.coarse4) M.fineUsed4 = true; }
+  if (M.obj === 40 && M.h > focusAt(40) + 4) coach($("labCoach"), "⚠ Careful! The slide is almost touching the 40× lens. Lower the stage.", "warn");
+  refresh(M.obj === 40 && M.h > focusAt(40) + 4);
+  return true;
+}
+
+function bindScope() {
+  var svg = $("labScopeHost").querySelector("svg");
+  var drag = null;
+  function knobCentre() { var r = svg.querySelector('[data-part="fine"] circle').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+  var turners = { coarse: knobTurner(knobCentre, true), fine: knobTurner(knobCentre, false) };
+  svg.addEventListener("pointerdown", function (e) {
+    var g = e.target.closest("[data-act]"); if (!g) return;
+    var act = g.getAttribute("data-act");
+    if (act === "coarse" || act === "fine") {
+      e.preventDefault();
+      drag = { t: turners[act], act: act, moved: 0, h: M.h };
+      svg.setPointerCapture(e.pointerId);
+      drag.t.down(e);
+    }
+  });
+  svg.addEventListener("pointermove", function (e) { if (drag) drag.t.move(e); });
+  function end() {
+    if (!drag) return;
+    drag.t.up();
+    if (drag.h === M.h && !$("labCoach").classList.contains("warn")) coach($("labCoach"), "Press and hold the " + drag.act + " knob, then circle it clockwise or anticlockwise (or use the dials).");
+    drag = null;
+  }
+  svg.addEventListener("pointerup", end); svg.addEventListener("pointercancel", end);
+  svg.addEventListener("click", function (e) {
+    var g = e.target.closest("[data-act]"); if (!g) return;
+    var act = g.getAttribute("data-act");
+    if (act === "light") actLight();
+    else if (act === "slide") actSlide();
+    else if (act === "nose") actObj(M.obj === 4 ? 10 : M.obj === 10 ? 40 : 4);
+    else if (act === "dia") { $("cDia").focus(); coach($("labCoach"), "Slide the diaphragm control to let in more or less light."); }
+  });
+  svg.addEventListener("wheel", function (e) {
+    var g = e.target.closest("[data-act]"); if (!g) return;
+    var act = g.getAttribute("data-act"); if (act !== "coarse" && act !== "fine") return;
+    e.preventDefault();
+    move((e.deltaY < 0 ? 1 : -1) * (act === "coarse" ? COARSE : FINE), act === "coarse");
+  }, { passive: false });
+}
+
+$("cLight").addEventListener("click", actLight);
+$("cSlide").addEventListener("click", actSlide);
+document.querySelectorAll("[data-obj]").forEach(function (b) { b.addEventListener("click", function () { actObj(+b.getAttribute("data-obj")); }); });
+$("cDia").addEventListener("input", function () { M.ap = +this.value; refresh(); });
+/* rotary dials: press and hold, then circle the knob. Clockwise = stage up, anticlockwise = stage down.
+   The knob turns in clicks (24° coarse, 15° fine), one stage step per click. */
+function knobTurner(getCentre, coarse) {
+  var d = null, STEP = coarse ? 24 : 15;
+  function ang(e) { var c = getCentre(); return Math.atan2(e.clientY - c.y, e.clientX - c.x) * 180 / Math.PI; }
+  return {
+    down: function (e) { d = { a: ang(e), acc: 0 }; },
+    move: function (e) {
+      if (!d) return;
+      var a = ang(e), da = a - d.a;
+      if (da > 180) da -= 360; if (da < -180) da += 360;   // shortest way round
+      d.a = a; d.acc += da;                                // screen y points down, so +da = clockwise
+      while (d && Math.abs(d.acc) >= STEP) {
+        var dir = d.acc > 0 ? 1 : -1; d.acc -= dir * STEP;
+        if (move(dir * (coarse ? COARSE : FINE), coarse) === false && coarse && M.obj !== 4) d = null;
+      }
+    },
+    up: function () { d = null; },
+    active: function () { return !!d; }
+  };
+}
+function bindDial(el, coarse) {
+  var t = knobTurner(function () { var r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, coarse);
+  el.addEventListener("pointerdown", function (e) { e.preventDefault(); el.setPointerCapture(e.pointerId); el.classList.add("turning"); t.down(e); });
+  el.addEventListener("pointermove", t.move);
+  function end() { t.up(); el.classList.remove("turning"); }
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("keydown", function (e) {
+    var dir = (e.key === "ArrowRight" || e.key === "ArrowUp") ? 1 : (e.key === "ArrowLeft" || e.key === "ArrowDown") ? -1 : 0;
+    if (!dir) return; e.preventDefault(); move(dir * (coarse ? COARSE : FINE), coarse);
+  });
+  el.addEventListener("wheel", function (e) { e.preventDefault(); move((e.deltaY < 0 ? 1 : -1) * (coarse ? COARSE : FINE), coarse); }, { passive: false });
+}
+bindDial($("dCoarse"), true);
+bindDial($("dFine"), false);
+
+/* pan the slide by dragging the view */
+(function () {
+  var fov = $("fov"), p = null;
+  fov.addEventListener("pointerdown", function (e) {
+    if (!M || !M.slide || !labTex) return;
+    p = { x: e.clientX, y: e.clientY }; fov.setPointerCapture(e.pointerId); fov.classList.add("dragging");
+  });
+  fov.addEventListener("pointermove", function (e) {
+    if (!p) return;
+    var cv = $("fovCanvas"), scale = cv.clientWidth * SCALE[M.obj] / labTex.w;
+    M.cx -= (e.clientX - p.x) / scale; M.cy -= (e.clientY - p.y) / scale;
+    p = { x: e.clientX, y: e.clientY };
+    renderField(cv, M, labTex);
+  });
+  function end() { p = null; fov.classList.remove("dragging"); }
+  fov.addEventListener("pointerup", end); fov.addEventListener("pointercancel", end);
+})();
+
+window.addEventListener("resize", function () {
+  if (!$("scrLab").hidden && M) renderField($("fovCanvas"), M, labTex);
+  if (!$("scrLabel").hidden && M) renderField($("snapCanvas"), M, labTex);
+});
+
+$("btnObserve").addEventListener("click", function () { if (G.mode === "challenge") challengeLocked(); else startLabel(); });
+
+/* ------------------------------------------------------------------
+   4. LABEL THE CELL
+------------------------------------------------------------------ */
+/* Diagrams: viewBox 640x400. Each target: {lab, side: L|R, y, at:[x,y] | path+frac} */
+var DIAG = {
+  cheek: {
+    svg:
+      '<path id="cellOutline" d="M205 205 C200 130 275 85 350 92 C430 98 482 150 475 215 C468 285 405 322 325 318 C245 314 208 270 205 205 Z" fill="#d6e4f7" stroke="#1d2626" stroke-width="3"/>' +
+      '<g fill="#8fa9de">' + [[260, 150], [300, 270], [410, 160], [420, 270], [250, 230], [380, 290], [330, 130], [440, 210], [280, 190]].map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3"/>'; }).join("") + "</g>" +
+      '<ellipse cx="355" cy="200" rx="34" ry="27" fill="#5f7fcf" stroke="#1d2626" stroke-width="2.5"/>',
+    targets: [
+      { lab: "cell membrane", side: "L", y: 80, path: "cellOutline", frac: 0.09 },
+      { lab: "cytoplasm", side: "L", y: 300, at: [262, 262] },
+      { lab: "nucleus", side: "R", y: 200, at: [362, 200] }
+    ]
+  },
+  onion: {
+    svg:
+      '<rect x="190" y="110" width="290" height="180" rx="5" fill="#e6c46d" stroke="#1d2626" stroke-width="3"/>' +
+      '<rect x="203" y="123" width="264" height="154" rx="2" fill="#f5e3a6"/>' +
+      '<rect x="206" y="126" width="258" height="148" rx="2" fill="none" stroke="#8a6a22" stroke-width="1.8"/>' +
+      '<rect x="244" y="143" width="204" height="114" rx="20" fill="#fffdf2" stroke="#c4a352" stroke-width="1.8"/>' +
+      '<ellipse cx="225" cy="200" rx="11" ry="20" fill="#a8701f" stroke="#1d2626" stroke-width="2.2"/>',
+    targets: [
+      { lab: "cell wall", side: "L", y: 70, at: [196, 140] },
+      { lab: "nucleus", side: "L", y: 200, at: [225, 200] },
+      { lab: "cell membrane", side: "L", y: 330, at: [206, 262] },
+      { lab: "cytoplasm", side: "R", y: 70, at: [350, 134] },
+      { lab: "vacuole", side: "R", y: 300, at: [350, 215] }
+    ]
+  },
+  elodea: {
+    svg: (function () {
+      var s = '<rect x="190" y="110" width="290" height="180" rx="5" fill="#b9d3a7" stroke="#1d2626" stroke-width="3"/>' +
+        '<rect x="203" y="123" width="264" height="154" rx="2" fill="#e4f1d6"/>' +
+        '<rect x="206" y="126" width="258" height="148" rx="2" fill="none" stroke="#5b7c47" stroke-width="1.8"/>' +
+        '<rect x="234" y="152" width="202" height="96" rx="18" fill="#fbfff5" stroke="#9bbb86" stroke-width="1.8"/>';
+      var pts = [];
+      for (var x = 226; x <= 446; x += 25) { pts.push([x, 139]); pts.push([x + 12, 262]); }
+      for (var y = 165; y <= 240; y += 25) { if (!(y > 180 && y < 222)) pts.push([449, y]); if (!(y > 170 && y < 232)) pts.push([221, y]); }
+      pts.forEach(function (p, i) { s += '<ellipse cx="' + p[0] + '" cy="' + p[1] + '" rx="9" ry="6" transform="rotate(' + ((i * 37) % 50 - 25) + ' ' + p[0] + ' ' + p[1] + ')" fill="#3f9b3a" stroke="#1d2626" stroke-width="1.4"/>'; });
+      s += '<ellipse cx="220" cy="201" rx="9" ry="17" fill="#8fa77f" stroke="#1d2626" stroke-width="2"/>';
+      return s;
+    })(),
+    targets: [
+      { lab: "cell wall", side: "L", y: 60, at: [196, 150] },
+      { lab: "nucleus", side: "L", y: 200, at: [220, 201] },
+      { lab: "cell membrane", side: "L", y: 340, at: [206, 270] },
+      { lab: "chloroplast", side: "R", y: 60, at: [351, 139] },
+      { lab: "cytoplasm", side: "R", y: 200, at: [452, 201] },
+      { lab: "vacuole", side: "R", y: 330, at: [330, 225] }
+    ]
+  }
+};
+
+var L = null;  // labelling state
+
+/* --- spelling marking --- */
+function norm(s) { return String(s || "").toLowerCase().replace(/[^a-z ]/g, " ").replace(/\s+/g, " ").trim(); }
+function lev(a, b) {
+  var m = a.length, n = b.length, d = [], i, j;
+  for (i = 0; i <= m; i++) { d[i] = [i]; }
+  for (j = 0; j <= n; j++) d[0][j] = j;
+  for (i = 1; i <= m; i++) for (j = 1; j <= n; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  return d[m][n];
+}
+function variants(lab) { return [lab, lab + "s", lab.replace(/us$/, "i")]; }   // nucleus → nuclei; chloroplast → chloroplasts
+/* returns "ok" | "spell" | "wrong" */
+function mark(typed, lab) {
+  var t = norm(typed);
+  if (!t) return "wrong";
+  if (variants(lab).indexOf(t) >= 0) return "ok";
+  if (t.length >= 4 && lab.split(" ").length > 1 && lab.split(" ").indexOf(t) >= 0) return "spell";   // e.g. "membrane" for "cell membrane"
+  var near = Math.max(1, Math.min(2, Math.floor(lab.length / 5)));   // 1 slip for short words, 2 for longer ones
+  var closest = Math.min.apply(null, variants(lab).map(function (v) { return lev(t, v); }));
+  if (closest > near) return "wrong";
+  // a close match that is really the correct spelling of a different part is wrong, not a spelling slip
+  var all = Object.keys(FN.g23);
+  for (var i = 0; i < all.length; i++) if (all[i] !== lab && variants(all[i]).indexOf(t) >= 0) return "wrong";
+  return "spell";
+}
+
+function startLabel() {
+  var key = G.spec, sp = SPECIMENS[key], d = DIAG[key];
+  var labels = sp.labels[G.course];
+  var targets = d.targets.filter(function (t) { return labels.indexOf(t.lab) >= 0; });
+  L = { key: key, targets: targets, state: {}, tries: 0, finished: false };
+  updateSB("Step 4 · Label the cell");
+  show("scrLabel");
+  $("snapNote").textContent = sp.note;
+  $("snapCredit").innerHTML = labTex && labTex.photo ? 'Photo: <a href="' + sp.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>' : "Drawn view";
+  requestAnimationFrame(function () { renderField($("snapCanvas"), M, labTex); });
+  // diagram with numbered markers
+  var svg = $("diag");
+  svg.setAttribute("viewBox", "150 40 350 320");
+  svg.innerHTML = d.svg;
+  var html = "";
+  targets.forEach(function (t, i) {
+    var p = t.at;
+    if (t.path) { var el = svg.querySelector("#" + t.path), len = el.getTotalLength(), q = el.getPointAtLength(len * t.frac); p = [q.x, q.y]; }
+    var mx = t.side === "L" ? 168 : 482, my = Math.min(340, Math.max(60, t.y));
+    html += '<line x1="' + mx + '" y1="' + my + '" x2="' + p[0].toFixed(1) + '" y2="' + p[1].toFixed(1) + '" stroke="#1d2626" stroke-width="2"/>' +
+            '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3.2" fill="#1d2626"/>' +
+            '<g class="mk" data-i="' + i + '"><circle cx="' + mx + '" cy="' + my + '" r="14" fill="#1d2626"/><text x="' + mx + '" y="' + (my + 5.5) + '" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">' + (i + 1) + "</text></g>";
+  });
+  svg.insertAdjacentHTML("beforeend", html);
+  svg.querySelectorAll(".mk").forEach(function (g) { g.addEventListener("click", function () { $("lbl" + g.getAttribute("data-i")).focus(); }); });
+  // typing boxes
+  $("slots").innerHTML = targets.map(function (t, i) {
+    return '<div class="slot" id="slot' + i + '"><span class="n">' + (i + 1) + '</span>' +
+      '<input id="lbl' + i + '" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-label="Label ' + (i + 1) + '" placeholder="Type label ' + (i + 1) + '">' +
+      '<span class="fb" id="fb' + i + '"></span></div>';
+  }).join("");
+  targets.forEach(function (t, i) {
+    var inp = $("lbl" + i);
+    inp.addEventListener("input", function () { if (L.state[i] !== "ok") { L.state[i] = null; paint(); } updateCheck(); });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return; e.preventDefault();
+      for (var k = i + 1; k < targets.length + i + 1; k++) { var j = k % targets.length; if (L.state[j] !== "ok" && !$("lbl" + j).value.trim()) { $("lbl" + j).focus(); return; } }
+      if (!$("btnCheck").disabled) $("btnCheck").click();
+    });
+  });
+  $("btnCheck").hidden = false; $("btnShow").hidden = true; $("btnLblNext").hidden = true; $("fnTable").innerHTML = "";
+  coach($("lblCoach"), "Type the name of each numbered part. Spelling counts!");
+  paint(); updateCheck();
+}
+function updateCheck() {
+  var all = L.targets.every(function (t, i) { return L.state[i] === "ok" || $("lbl" + i).value.trim(); });
+  $("btnCheck").disabled = L.finished || !all;
+}
+function paint() {
+  L.targets.forEach(function (t, i) {
+    var st = L.state[i], slot = $("slot" + i), fb = $("fb" + i);
+    slot.className = "slot" + (st ? " " + st : "");
+    fb.textContent = st === "ok" ? "✓" : st === "spell" ? (L.short && L.short[i] ? "Give the full name" : "Check your spelling") : st === "wrong" ? "✗ Not this part" : st === "shown" ? "Answer shown" : "";
+    $("lbl" + i).readOnly = st === "ok" || st === "shown";
+    var c = $("diag").querySelector('.mk[data-i="' + i + '"] circle');
+    if (c) c.setAttribute("fill", st === "ok" ? "#1f9d55" : st === "spell" ? "#FF8243" : st === "wrong" ? "#d64545" : st === "shown" ? "#5a6b6b" : "#1d2626");
+  });
+}
+function finishLabel(msg) {
+  L.finished = true;
+  $("btnCheck").hidden = true; $("btnShow").hidden = true;
+  var sp = SPECIMENS[L.key];
+  coach($("lblCoach"), msg + " " + (sp.after[G.course] || ""), "good");
+  var fns = FN[G.course], rows = "";
+  L.targets.forEach(function (t) { rows += "<tr><td><b>" + esc(t.lab) + "</b></td><td>" + esc(fns[t.lab]) + "</td></tr>"; });
+  $("fnTable").innerHTML = '<table class="table"><tr><th>Part</th><th>Function</th></tr>' + rows + "</table>";
+  G.done[L.key] = true;
+  $("btnLblNext").hidden = false;
+  $("btnLblNext").textContent = COURSE_SPECS[G.course].every(function (k) { return G.done[k]; }) ? "See my results ▸" : "Next slide ▸";
+}
+$("btnCheck").addEventListener("click", function () {
+  L.tries++;
+  var spell = 0, wrong = 0;
+  L.targets.forEach(function (t, i) {
+    if (L.state[i] === "ok") return;
+    var m = mark($("lbl" + i).value, t.lab);
+    L.short = L.short || {}; L.short[i] = m === "spell" && t.lab.split(" ").indexOf(norm($("lbl" + i).value)) >= 0;
+    L.state[i] = m;
+    if (m === "ok") $("lbl" + i).value = t.lab;
+    if (m === "spell") spell++;
+    if (m === "wrong") wrong++;
+  });
+  if (L.tries === 1) {
+    G.labelTotal += L.targets.length;
+    G.labelFirst += L.targets.length - spell - wrong;
+  }
+  G.spellSlips += spell;
+  paint(); updateCheck();
+  if (!spell && !wrong) { Sound.ok(); finishLabel(L.tries === 1 ? "All correct and spelt perfectly, first time!" : "All correct now!"); return; }
+  if (wrong) Sound.bad(); else Sound.spell();
+  var parts = [];
+  if (wrong) parts.push(wrong + " label" + (wrong > 1 ? "s are" : " is") + " the wrong part (red)");
+  if (spell) parts.push(spell + " " + (spell > 1 ? "are" : "is") + " the right part but not spelt or named in full (orange)");
+  coach($("lblCoach"), parts.join(", and ") + ". Fix " + (spell + wrong > 1 ? "them" : "it") + " and check again.", "warn");
+  if (L.tries >= 2) $("btnShow").hidden = false;
+  for (var i = 0; i < L.targets.length; i++) if (L.state[i] !== "ok") { $("lbl" + i).focus(); $("lbl" + i).select(); break; }
+});
+$("btnShow").addEventListener("click", function () {
+  L.targets.forEach(function (t, i) { if (L.state[i] !== "ok") { L.state[i] = "shown"; $("lbl" + i).value = t.lab; } });
+  paint(); finishLabel("Here are the answers. Learn the spellings of the ones in grey.");
+});
+$("btnLblNext").addEventListener("click", function () {
+  if (COURSE_SPECS[G.course].every(function (k) { return G.done[k]; })) showResults(); else showMenu();
+});
+
+/* ------------------------------------------------------------------
+   5. RESULTS
+------------------------------------------------------------------ */
+function showResults() {
+  updateSB("Results");
+  var aw = awardBadge();
+  $("resTitle").textContent = "Lab complete! 🎉";
+  $("resBadge").innerHTML = '<div class="badges">' + badgeHTML(G.course, aw.rec, G.profile, aw.best) + "</div>" +
+    (aw.saved ? '<p class="howto">Your badge is saved on this device and will show on the start screen. Show it to your teacher to collect your microscope. <b>Challenge mode is now unlocked!</b></p>'
+              : '<p class="err">This browser could not save your badge (private browsing?). Show this screen to your teacher now.</p>');
+  $("btnAgain").textContent = "Play again"; $("btnChal").hidden = false;
+  var stats = [
+    [G.partsFirst + "/" + G.partsOrder.length, "microscope parts right first time"],
+    [G.labelFirst + "/" + G.labelTotal, "cell labels right first time"],
+    [G.spellSlips, G.spellSlips === 1 ? "spelling slip" : "spelling slips"],
+    [G.mistakes, G.mistakes === 1 ? "procedure mistake" : "procedure mistakes"]
+  ];
+  $("stats").innerHTML = stats.map(function (s) { return '<div class="stat"><b>' + s[0] + "</b><span>" + s[1] + "</span></div>"; }).join("");
+  var note = "";
+  if (G.partsMissed.length) note += "<p><b>Parts to revise:</b> " + G.partsMissed.map(function (id) { return esc(partById(id).name); }).join(", ") + ".</p>";
+  if (G.course === "g23") {
+    note += '<table class="table"><tr><th></th><th>Animal cell</th><th>Plant cell</th></tr>' +
+      "<tr><td><b>Cell wall</b></td><td>Absent</td><td>Present</td></tr>" +
+      "<tr><td><b>Chloroplast</b></td><td>Absent</td><td>Present (in cells exposed to light)</td></tr>" +
+      "<tr><td><b>Vacuole</b></td><td>Small, numerous</td><td>Single large central vacuole with cell sap</td></tr>" +
+      "<tr><td><b>Cytoplasm</b></td><td>Fills most of the cell</td><td>Thin lining within the cell</td></tr></table>";
+  } else {
+    note += "<p><b>Remember:</b> start at the lowest power, focus with the coarse knob, sharpen with the fine knob, and use only the fine knob at high power.</p>";
+  }
+  $("resNote").innerHTML = note;
+  show("scrResults");
+  celebrate();
+}
+$("btnAgain").addEventListener("click", function () { Confetti.stop(); var c = G.course; if (G.mode === "challenge") { startChallenge(c); return; } newGame(c); startParts(); });
+$("btnChal").addEventListener("click", function () { Confetti.stop(); startChallenge(G.course); });
+
+/* ------------------------------------------------------------------
+   6. CHALLENGE MODE
+------------------------------------------------------------------ */
+var CH = null, timerId = null;
+function stopTimer() { if (timerId) clearInterval(timerId); timerId = null; }
+function tick() { if (CH) $("sbTimer").textContent = "⏱ " + fmtTime((Date.now() - CH.t0) / 1000); }
+function startChallenge(course) {
+  var p = (G && G.profile) || requireProfile(); if (!p) return;
+  var st = loadStore();
+  if (!(st.badges && st.badges[pid(p) + "|" + course])) { renderStart(); show("scrStart"); return; }
+  newGame(course); G.profile = p; G.mode = "challenge";
+  CH = { order: shuffle(CHALLENGE_SPECS), idx: 0, t0: Date.now(), slides: [], answered: false };
+  CH.order.forEach(function (k) { CH.slides.push({ key: k, mistakes: 0, correct: null, secs: 0 }); });
+  $("sbTimer").hidden = false; stopTimer(); timerId = setInterval(tick, 500); tick();
+  Confetti.stop(); Music.start();
+  startLab(CH.order[0]);
+  coach($("labCoach"), "Challenge on! Get each slide sharp and well lit at 40×. Every mistake costs points.");
+}
+function challengeLocked() {
+  Sound.pop();
+  var sl = CH.slides[CH.idx];
+  sl.secs = (Date.now() - CH.slideStart) / 1000;
+  CH.answered = true;
+  $("btnObserve").hidden = true;
+  if (G.course === "g1") { revealSlide(null); return; }
+  $("idq").hidden = false;
+  coach($("labCoach"), "Look closely. Animal cell or plant cell?");
+}
+document.querySelectorAll("#idq [data-kind]").forEach(function (b) {
+  b.addEventListener("click", function () {
+    if ($("idq").hidden) return;
+    var sp = SPECIMENS[CH.order[CH.idx]], right = b.getAttribute("data-kind") === sp.kind;
+    CH.slides[CH.idx].correct = right;
+    if (right) Sound.ok(); else Sound.bad();
+    $("idq").hidden = true;
+    revealSlide(right);
+  });
+});
+function revealSlide(right) {
+  var sp = SPECIMENS[CH.order[CH.idx]];
+  var lead = right === null ? "Locked in! " : right ? "✓ Correct — " + sp.kind.toLowerCase() + ". " : "✗ Not quite — it's " + (sp.kind === "Animal cell" ? "an " : "a ") + sp.kind.toLowerCase() + ". ";
+  coach($("labCoach"), lead + sp.reveal, right === false ? "warn" : "good");
+  $("specNote").innerHTML = "<b>Slide " + (CH.idx + 1) + ":</b> " + esc(sp.title) + ".";
+  if (labTex && labTex.photo && sp.page) $("labCredit").innerHTML = 'Photo: <a href="' + sp.page + '" target="_blank" rel="noopener">Wikimedia Commons</a>';
+  $("btnChNext").hidden = false;
+  $("btnChNext").textContent = CH.idx + 1 < CH.order.length ? "Next slide ▸" : "See my score ▸";
+}
+$("btnChNext").addEventListener("click", function () {
+  CH.idx++;
+  if (CH.idx < CH.order.length) { startLab(CH.order[CH.idx]); return; }
+  finishChallenge();
+});
+function finishChallenge() {
+  stopTimer(); Music.fadeOut();
+  var secs = (Date.now() - CH.t0) / 1000, mist = 0, ids = 0, g23 = G.course === "g23";
+  CH.slides.forEach(function (s) { mist += s.mistakes; if (s.correct) ids++; });
+  var base = CH.slides.length * 100, idPts = g23 ? ids * 50 : 0, pen = mist * 20, timeBonus = Math.max(0, Math.round(300 - secs));
+  var score = Math.max(0, base + idPts - pen + timeBonus);
+  var st = loadStore(), key = pid(G.profile) + "|" + G.course; st.best = st.best || {};
+  var prev = st.best[key], isBest = !prev || score > prev.score;
+  if (isBest) { st.best[key] = { score: score, secs: Math.round(secs), t: Date.now() }; saveStore(st); }
+  updateSB("Challenge results");
+  $("sbTimer").textContent = "⏱ " + fmtTime(secs);
+  $("resTitle").textContent = isBest ? "New personal best! 🏆" : "Challenge complete! 🏁";
+  var stats = [[score, "points"], [fmtTime(secs), "total time"], [mist, mist === 1 ? "procedure mistake" : "procedure mistakes"]];
+  if (g23) stats.splice(2, 0, [ids + "/" + CH.slides.length, "cells identified correctly"]);
+  $("stats").innerHTML = stats.map(function (x) { return '<div class="stat"><b>' + x[0] + "</b><span>" + x[1] + "</span></div>"; }).join("");
+  var rows = CH.slides.map(function (s, i) {
+    var sp = SPECIMENS[s.key];
+    return "<tr><td>" + (i + 1) + ". " + esc(sp.title) + "</td><td>" + sp.kind + "</td>" + (g23 ? "<td>" + (s.correct ? "✓" : "✗") + "</td>" : "") + "<td>" + s.mistakes + "</td><td>" + fmtTime(s.secs) + "</td></tr>";
+  }).join("");
+  $("resBadge").innerHTML = "";
+  $("resNote").innerHTML = '<table class="table"><tr><th>Slide</th><th>Cell type</th>' + (g23 ? "<th>Your answer</th>" : "") + "<th>Mistakes</th><th>Time to focus</th></tr>" + rows + "</table>" +
+    '<p class="howto"><b>Score:</b> ' + base + " for focusing" + (g23 ? " + " + idPts + " for identifying" : "") + " − " + pen + " for mistakes + " + timeBonus + " time bonus (finish under 5 minutes)." +
+    (prev && !isBest ? " Your best is " + prev.score + " pts." : "") + "</p>";
+  $("btnChal").hidden = true; $("btnAgain").textContent = "Try the challenge again";
+  show("scrResults");
+  celebrate();
+}
+$("btnChange").addEventListener("click", goStart);
+
+})();
+</script>
+</body>
+</html>
