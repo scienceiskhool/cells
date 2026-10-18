@@ -600,8 +600,8 @@ function scopeSVG(mode) {
   '<g class="part" data-part="nosepiece" data-act="nose"><path d="M138 182 L202 182 L194 200 L146 200 Z" fill="#cfd8d8" stroke="#1d2626" stroke-width="3" stroke-linejoin="round"/></g>' +
   // knobs
   // coarse knob (large) with the fine knob mounted in its centre
-  '<g class="part knob" data-part="coarse" data-act="coarse"><circle cx="80" cy="250" r="24" fill="#FF8243" stroke="#1d2626" stroke-width="3"/><g id="coarseMark' + mode + '"><line x1="80" y1="229" x2="80" y2="236" stroke="#1d2626" stroke-width="3.5" stroke-linecap="round"/></g></g>' +
-  '<g class="part knob" data-part="fine" data-act="fine"><circle cx="80" cy="250" r="11" fill="#FCE883" stroke="#1d2626" stroke-width="3"/><g id="fineMark' + mode + '"><line x1="80" y1="250" x2="80" y2="241" stroke="#1d2626" stroke-width="2.5" stroke-linecap="round"/></g></g>' +
+  '<g class="part knob" data-part="coarse" data-act="coarse"><circle cx="80" cy="328" r="24" fill="#FF8243" stroke="#1d2626" stroke-width="3"/><g id="coarseMark' + mode + '"><line x1="80" y1="307" x2="80" y2="314" stroke="#1d2626" stroke-width="3.5" stroke-linecap="round"/></g></g>' +
+  '<g class="part knob" data-part="fine" data-act="fine"><circle cx="80" cy="328" r="11" fill="#FCE883" stroke="#1d2626" stroke-width="3"/><g id="fineMark' + mode + '"><line x1="80" y1="328" x2="80" y2="319" stroke="#1d2626" stroke-width="2.5" stroke-linecap="round"/></g></g>' +
   '</svg>';
 }
 
@@ -1112,8 +1112,8 @@ function refresh(keepCoach) {
   $("bulblab").setAttribute("fill", M.light ? "#FCE883" : "#e3e8e8");
   $("swlab").setAttribute("x", M.light ? "249" : "241");
   $("leverlab").setAttribute("x", (184 + M.ap * 0.22).toFixed(1));
-  $("coarseMarklab").setAttribute("transform", "rotate(" + M.coarseAng.toFixed(1) + " 80 250)");
-  $("fineMarklab").setAttribute("transform", "rotate(" + M.fineAng.toFixed(1) + " 80 250)");
+  $("coarseMarklab").setAttribute("transform", "rotate(" + M.coarseAng.toFixed(1) + " 80 328)");
+  $("fineMarklab").setAttribute("transform", "rotate(" + M.fineAng.toFixed(1) + " 80 328)");
   $("dCoarse").querySelector(".rot").setAttribute("transform", "rotate(" + M.coarseAng.toFixed(1) + " 50 50)");
   $("dFine").querySelector(".rot").setAttribute("transform", "rotate(" + M.fineAng.toFixed(1) + " 50 50)");
   // controls
